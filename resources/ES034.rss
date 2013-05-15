@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<atom:link href="http://meteoalarm.eu/documents/rss/es/ES034.rss" rel="self" type="application/rss+xml"/>
+		<title>Meteoalarm Spain, Murcia</title>
+		<link>http://www.meteoalarm.eu/es_ES/0/0/ES034.html</link>
+		<description>Metoalarm actual warnings from Spain, Murcia</description>
+		<ttl>10</ttl>
+		<language>eng</language>
+		<item>
+			<title>Murcia</title>
+			<link>http://www.meteoalarm.eu/es_ES/0/0/ES034.html</link>
+			<description><![CDATA[<table border="0" cellspacing="0" cellpadding="3"><tr><th colspan="3" align="left">Today</th></tr><tr><td width="28"><img border="1" src="http://www.meteoalarm.eu/documents/rss/wflag-l2-t3.jpg" alt="awt:3 level:2"></td><td><b>From: </b><i>15.05.2013 09:00 CET</i><b> Until: </b><i>16.05.2013 00:00 CET</i></td></tr><tr><td width="28"></td><td></td></tr><tr><td width="28"><img border="1" src="http://www.meteoalarm.eu/documents/rss/wflag-l2-t10.jpg" alt="awt:10 level:2"></td><td><b>From: </b><i>15.05.2013 09:00 CET</i><b> Until: </b><i>16.05.2013 00:00 CET</i></td></tr><tr><td width="28"></td><td></td></tr><tr><th colspan="3" align="left"><br />Tomorrow</th></tr><tr><td width="28"><img border="1" src="http://www.meteoalarm.eu/documents/rss/wflag-l2-t3.jpg" alt="awt:3 level:2"></td><td><b>From: </b><i>15.05.2013 09:00 CET</i><b> Until: </b><i>16.05.2013 00:00 CET</i></td></tr><tr><td width="28"></td><td></td></tr><tr><td width="28"><img border="1" src="http://www.meteoalarm.eu/documents/rss/wflag-l2-t10.jpg" alt="awt:10 level:2"></td><td><b>From: </b><i>15.05.2013 09:00 CET</i><b> Until: </b><i>16.05.2013 00:00 CET</i></td></tr><tr><td width="28"></td><td></td></tr></table>]]></description>
+			<pubDate>Wed, 15 May 2013 08:18:02 +0200</pubDate>
+			<guid isPermaLink="false">1e4505daa3f0c40ba85292975b262965</guid>
+		</item>
+	</channel>
+</rss>

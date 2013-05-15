@@ -1,0 +1,1 @@
+[20130515] Creado proyecto para la aplicación Android y desarrollando parser. Estoy viendo como extraer el campo CDATA de la descripción del item.
