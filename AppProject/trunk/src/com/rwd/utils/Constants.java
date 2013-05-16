@@ -24,4 +24,8 @@ public class Constants {
 	public static final String pubDate = "pubDate";
 	public static final String guid = "guid";
 	
+	//Days in alarm
+	public static final int today = 0;
+	public static final int tomorrow = 1;
+	
 }

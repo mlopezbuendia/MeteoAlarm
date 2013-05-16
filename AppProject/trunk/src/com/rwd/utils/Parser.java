@@ -15,6 +15,7 @@ import java.util.List;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.util.Log;
 import android.util.Xml;
 
 public class Parser {
@@ -67,6 +68,8 @@ public class Parser {
 			}
 		}
 		
+		return items;
+		
 	}
 	
 	/**
@@ -79,8 +82,8 @@ public class Parser {
 	 */
 	private Item readItem(XmlPullParser parser) throws XmlPullParserException, IOException{
 		
-		Item result;
-		String currentTag = null;			//Name of curren tag
+		Item result = null;
+		String currentTag = null;			//Name of current tag
 		String title = null;				//Item's title
 		String link = null;					//Item's link
 		DetailedInfo description = null;	//Item's description
@@ -97,17 +100,22 @@ public class Parser {
 			
 			currentTag = parser.getName();
 			
-			//Reading item content
+			//Reading item content...
+			//1. Title
 			if(currentTag.equals(Constants.title)){
 				title = readText(parser, Constants.title);
 			}
+			//2. Link
 			else if(currentTag.equals(Constants.link)){
 				link = readText(parser, Constants.link);
 			}
+			//3. Description
 			else if(currentTag.equals(Constants.description)){
 				description = readDescription(parser);
 			}
 		}
+		
+		return result;
 		
 	}
 	
@@ -131,14 +139,61 @@ public class Parser {
 		
 	}
 	
-	private DetailedInfo readDescription(XmlPullParser parser){
+	/**
+	 * Read the string that contains the detailed alarm info
+	 * 
+	 * @param parser to read
+	 * @return new DetailedInfo object
+	 * @throws IOException 
+	 * @throws XmlPullParserException 
+	 */
+	private DetailedInfo readDescription(XmlPullParser parser) throws XmlPullParserException, IOException{
 		
 		DetailedInfo result = null;
 		Alarm today = null;					//Today's alarm info
 		Alarm tomorrow = null;				//Tomorrow's alarm info
 		String cData = null;				//Detailed info text raw
 				
+		//Position check
+		parser.require(XmlPullParser.START_TAG, Constants.ns, Constants.description);
 		
+		//Go to the next token CDATA from description
+		if(parser.nextToken() == XmlPullParser.CDSECT){
+			//If is CDATA extracts text...
+			cData = parser.getText();
+		}
+		
+		//Position check
+		parser.require(XmlPullParser.END_TAG, Constants.ns, Constants.description);
+		
+		//If the position is ok no exception is thrown so we can go on...
+			
+		//Get alarms
+		today = extractAlarm(cData, Constants.today);
+		tomorrow = extractAlarm(cData, Constants.tomorrow);
+		
+		//Build DetailedInfo instance
+		result = new DetailedInfo(today, tomorrow);
+		
+		return result;
+	}
+	
+	private void skip (XmlPullParser parser){
+		
+	}
+	
+	/**
+	 * Return the next alarm extracted from cData
+	 * 
+	 * @param cData input with today and tomorrow's alarms
+	 * @param day to extract (0 = today, 1 =  tomorrow)
+	 * @return Alarm with info from cData
+	 */
+	private Alarm extractAlarm(String cData, int day){
+		
+		Alarm result = null;
+		
+		return result;		
 	}
 	
 }
