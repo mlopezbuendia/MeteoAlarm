@@ -24,7 +24,7 @@ public class Item {
 	 * @param pubDate
 	 * @param guid
 	 */
-	private Item(String title, String link, DetailedInfo description, String pubDate, String guid) {
+	public Item(String title, String link, DetailedInfo description, String pubDate, String guid) {
 		
 		this.title = title;
 		this.link = link;
@@ -32,6 +32,14 @@ public class Item {
 		this.pubDate = pubDate;
 		this.guid = guid;
 		
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}	
 	
 }

@@ -28,4 +28,15 @@ public class Constants {
 	public static final int today = 0;
 	public static final int tomorrow = 1;
 	
+	//Start of alarm info in cData
+	public static final String startInfo = "awt;";
+	public static final String startLevel = "level:";
+	
+	//URL where we extract the info from
+	public static final String URL = "http://www.meteoalarm.eu/documents/rss/es.rss";
+	
+	//Constants for settings and type of data connection
+	public static final String ANY = "Any";
+	public static final String WIFI = "Wi-Fi";
+	
 }

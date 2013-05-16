@@ -1,0 +1,12 @@
+<option value="1">Wind</option>
+<option value="2">Snow/Ice</option>
+<option value="3">Thunderstorms</option>
+<option value="4">Fog</option>
+<option value="5">Extreme high temperature</option>
+<option value="6">Extreme low temperature</option>
+<option value="7">Coastal Event</option>
+<option value="8">Forestfire</option>
+<option value="9">Avalanches</option>
+<option value="10">Rain</option>
+<option value="12">Flood</option>
+<option value="13">Rain-Flood</option>

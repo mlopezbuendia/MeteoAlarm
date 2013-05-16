@@ -4,5 +4,9 @@
     <string name="app_name">WeatherAlarms</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-
+    <string name="page_title">MeteoAlarm</string>
+    <string name="updated">Updated</string>
+	<string name="connection_error">Connection Error while trying to fetch xml content</string>
+	<string name="xml_error">Error while parsing xml content</string>
+    
 </resources>
