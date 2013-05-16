@@ -3,7 +3,6 @@ package com.rwd.weatheralarms;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -17,7 +16,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.webkit.WebView;
+import android.widget.Button;
 
 import com.rwd.utils.Constants;
 import com.rwd.utils.DetailedInfo;
@@ -34,11 +36,29 @@ public class MainActivity extends Activity {
     private static boolean wifiConnected = false; 
     // Whether there is a mobile connection.
     private static boolean mobileConnected = false;
+    
+    //Parse button
+    private static Button parseButton = null;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        //Set initial prefs
+        sPref = Constants.ANY;
+        mobileConnected = true;
+        
+        //Set button action
+        parseButton = (Button)findViewById(R.id.parseButton);
+        parseButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				//Launch xml download
+				loadInfo();
+			}
+		});
     }
 
 
@@ -120,8 +140,10 @@ public class MainActivity extends Activity {
     		Calendar rightNow = null;					//Current Date
     		
     		//Construct html output
+    		htmlString = new StringBuilder();
     		htmlString.append("<h3>" + getResources().getString(R.string.page_title) + "</h3>");
     		formatter = new SimpleDateFormat("MMM dd h:mmaa");
+    		rightNow = Calendar.getInstance();
     		htmlString.append("<em>" + getResources().getString(R.string.updated) + formatter.format(rightNow.getTime()) + "</em>");
     		
     		//Get stream from url
