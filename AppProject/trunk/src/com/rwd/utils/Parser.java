@@ -39,10 +39,10 @@ public class Parser {
 	}
 	
 	//Processing the feed
-	private List readFeed(XmlPullParser parser) throws XmlPullParserException, IOException{
+	private List<Item> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException{
 		
 		//Result
-		List items = new ArrayList();
+		List<Item> items = new ArrayList<Item>();
 		
 		//Name of current tag
 		String currentTag = null;
@@ -62,6 +62,10 @@ public class Parser {
 			//Looking for "item" tag
 			if(currentTag.equals(Constants.lookedTag)){
 				items.add(readItem(parser));
+			}
+			//If we receive channel tag, skip only this line
+			else if(currentTag.equals(Constants.channelTag)){
+				continue;
 			}
 			else{
 				skip(parser);
@@ -105,23 +109,23 @@ public class Parser {
 			//Reading item content...
 			//1. Title
 			if(currentTag.equals(Constants.title)){
-				title = readText(parser, Constants.title);
+				title = readInfo(parser, Constants.title);
 			}
 			//2. Link
 			else if(currentTag.equals(Constants.link)){
-				link = readText(parser, Constants.link);
+				link = readInfo(parser, Constants.link);
 			}
 			//3. Description
 			else if(currentTag.equals(Constants.description)){
-				description = readDescription(parser);
+				description = readDescription(parser);				
 			}
 			//4. Pub Date
 			else if(currentTag.equals(Constants.pubDate)){
-				pubDate = readText(parser, Constants.pubDate);
+				pubDate = readInfo(parser, Constants.pubDate);
 			}
 			//5. Guid
 			else if(currentTag.equals(Constants.guid)){
-				guid = readText(parser, Constants.guid);
+				guid = readInfo(parser, Constants.guid);
 			}
 			//...else skip
 			else{
@@ -145,12 +149,12 @@ public class Parser {
 	 * @throws XmlPullParserException
 	 * @throws IOException
 	 */
-	private String readText(XmlPullParser parser, String tag) throws XmlPullParserException, IOException{
+	private String readInfo(XmlPullParser parser, String tag) throws XmlPullParserException, IOException{
 		
 		String result = null;
 		
 		parser.require(XmlPullParser.START_TAG, Constants.ns, tag);
-		result = parser.getText();
+		result = readText(parser);
 		parser.require(XmlPullParser.END_TAG, Constants.ns, tag);
 		return result;
 		
@@ -178,6 +182,7 @@ public class Parser {
 		if(parser.nextToken() == XmlPullParser.CDSECT){
 			//If is CDATA extracts text...
 			cData = parser.getText();
+			parser.nextTag();
 		}
 		
 		//Position check
@@ -283,6 +288,27 @@ public class Parser {
 		}
 		
 		return result;		
+	}
+	
+	/**
+	 * Read text content 
+	 * 
+	 * @param parser
+	 * @return text content 
+	 * @throws IOException 
+	 * @throws XmlPullParserException 
+	 */
+	private String readText(XmlPullParser parser) throws XmlPullParserException, IOException{
+		
+		String result = null;
+		
+		if(parser.next() == XmlPullParser.TEXT){
+			result = parser.getText();
+			parser.nextTag();
+		}
+		
+		return result;
+		
 	}
 	
 }

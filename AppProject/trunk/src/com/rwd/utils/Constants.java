@@ -16,6 +16,8 @@ public class Constants {
 	public static final String lookedTag = "item";
 	//Start tag in doc
 	public static final String startTag = "rss";
+	//Channel tag (we need to ignore it)
+	public static final String channelTag = "channel";
 	
 	//Elements inside item
 	public static final String title = "title";

@@ -12,6 +12,7 @@ import java.util.List;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Activity;
+import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -147,7 +148,15 @@ public class MainActivity extends Activity {
     		htmlString.append("<em>" + getResources().getString(R.string.updated) + formatter.format(rightNow.getTime()) + "</em>");
     		
     		//Get stream from url
-    		stream = downloadUrl(url);
+    		//stream = downloadUrl(url);
+    		
+    		//Get it from file
+    		AssetManager am = getAssets();
+    		stream = am.open("es.rss");
+    		
+    		//Initialize parser
+    		parser = new Parser();
+    		
     		//Get items from stream
     		try {
 				items = parser.parse(stream);
