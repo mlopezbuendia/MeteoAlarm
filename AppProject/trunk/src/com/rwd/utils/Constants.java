@@ -41,4 +41,7 @@ public class Constants {
 	public static final String ANY = "Any";
 	public static final String WIFI = "Wi-Fi";
 	
+	//Connection failure in Google Play request
+	public final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+	
 }

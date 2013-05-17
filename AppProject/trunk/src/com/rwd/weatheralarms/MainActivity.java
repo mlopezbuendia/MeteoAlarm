@@ -12,6 +12,9 @@ import java.util.List;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,6 +25,7 @@ import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.widget.Button;
 
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.rwd.utils.Constants;
 import com.rwd.utils.DetailedInfo;
 import com.rwd.utils.Item;
@@ -70,7 +74,48 @@ public class MainActivity extends Activity {
         return true;
     }
     
+    @Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		//Decide what to do based on the original request code
+		switch(requestCode){
+			
+		//Call to Google Play
+		case Constants.CONNECTION_FAILURE_RESOLUTION_REQUEST:
+			
+			//If the result code of the activity called is ok, try to connect again
+			switch(resultCode){
+			
+			case Activity.RESULT_OK:
+				
+				//TODO: try the request again
+				break;
+				
+			}
+		}
+		
+	}
+    
     /**
+     * Checks if Google Play Services are connected
+     * 
+     * @return
+     */
+    private boolean servicesConnected(){
+    	
+    	boolean result = false;
+    	int resultCode = -1;			//For checking availability of google services
+    	
+    	resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+
+    	
+    	return result;
+    	
+    }
+
+
+	/**
      * Uses AsyncTask to download the XML with the info
      * 
      */
@@ -209,5 +254,41 @@ public class MainActivity extends Activity {
 
     }
 
+    /**
+     * Define a Dialog Fragment where display error dialogs
+     * 
+     * @author manuel.lopez
+     *
+     */
+    public class ErrorDialogFragment extends DialogFragment{
+    	
+    	private Dialog mDialog;			//Handle dialog field
+    	
+    	/**
+    	 * Constructor
+    	 */
+    	public ErrorDialogFragment(){
+    		super();
+    		mDialog = null;
+    	}
+    	
+    	/**
+    	 * Set the dialog to display
+    	 * 
+    	 * @param dialog
+    	 */
+    	public void setDialog (Dialog dialog){
+    		this.mDialog = dialog;
+    	}
+    	
+    	/**
+    	 * Return a dialog to the Dialog Fragment
+    	 */
+    	@Override
+    	public Dialog onCreateDialog(Bundle savedInstanceState){
+    		return mDialog;
+    	}
+    	
+    }
     
 }
