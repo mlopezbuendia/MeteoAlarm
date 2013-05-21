@@ -7,7 +7,7 @@ package com.rwd.utils;
  *
  */
 
-public class Constants {
+public final class Constants {
 
 	//Namespace used in parser
 	public static final String ns = null;
@@ -44,4 +44,7 @@ public class Constants {
 	//Connection failure in Google Play request
 	public final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	
+	//Preferences Names
+	public static final String GENERAL_PREFERENCES = "WeatherAlarmPrefs";
+	public static final String PREF_PREFERRED_CONNECTION = "ConnectionPreferred";
 }

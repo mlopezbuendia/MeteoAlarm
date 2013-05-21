@@ -9,5 +9,6 @@
 	<string name="connection_error">Connection Error while trying to fetch xml content</string>
 	<string name="xml_error">Error while parsing xml content</string>
 	<string name="parse_button">Parse</string>
+	<string name="set_pref">Set Prefs</string>
     
 </resources>

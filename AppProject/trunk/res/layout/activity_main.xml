@@ -32,4 +32,14 @@
         android:layout_marginTop="18dp"
         android:text="@string/parse_button" />
 
+    <Button
+        android:id="@+id/setPreference"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/parseButton"
+        android:layout_alignBottom="@+id/parseButton"
+        android:layout_marginLeft="39dp"
+        android:layout_toRightOf="@+id/parseButton"
+        android:text="@string/set_pref" />
+
 </RelativeLayout>

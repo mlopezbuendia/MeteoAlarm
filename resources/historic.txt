@@ -1,1 +1,2 @@
 [20130515] Creado proyecto para la aplicación Android y desarrollando parser. Estoy viendo como extraer el campo CDATA de la descripción del item.
+[20130521] Creando el location request, voy por la línea 87 mirando los recursos que me he bajado sobre "LocationUpdates" y mirando las webs abiertas en Chrome
