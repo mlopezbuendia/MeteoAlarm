@@ -8,6 +8,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -47,9 +48,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 																  GooglePlayServicesClient.ConnectionCallbacks, 
 																  GooglePlayServicesClient.OnConnectionFailedListener  {
 	
-	// Whether the display should be refreshed.
-    private static boolean refreshDisplay = true; 
-    
     // General Preferences && Location Specific Preferences
     private static SharedPreferences sPref = null;
     private static SharedPreferences locPref = null;
@@ -232,10 +230,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	
     	boolean result = false;
     	int resultCode = -1;							//For checking availability of google services
-    	int errorCode = -1;								//For checking error
-    	Dialog errorDialog = null;						//Error dialog from Google Services
-    	ErrorDialogFragment errorFragment = null;		//Fragment to show error dialog
-    	
+   	
     	resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
     	
     	//If Google Play service is available
@@ -249,7 +244,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	//Google Play Services is not available for some reason
     	else{
     		//Get the error dialog from Google Play Services and show the error
-    		showErrorDialog(errorCode);
+    		showErrorDialog(resultCode);
     		
     		result = false;
     	}
@@ -288,164 +283,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	}
     	
     }
-    
-    /**
-     * Class to implement the async download
-     * 
-     */
-    private class DownloadXmlTask extends AsyncTask<String, Void, String> {
-
-    	@Override
-    	protected String doInBackground(String... urls) {
-    		
-    		//Try to get the Xml formatted from web
-    		try {
-				return loadXmlFromNetwork(urls[0]);
-			//If it doesn't succeed, it shows errors
-    		}catch (XmlPullParserException e) {
-	                return getResources().getString(R.string.EEG_xml_error);
-    		} catch (IOException e) {
-                return getResources().getString(R.string.EEG_connection_error);
-            } 
-    		
-    	}
-
-    	@Override
-    	protected void onPostExecute(String result){
-            setContentView(R.layout.activity_main);
-            // Displays the HTML string in the UI via a WebView
-            WebView myWebView = (WebView) findViewById(R.id.MAmainWebView);
-            myWebView.loadData(result, "text/html", null);
-    	}
-
-    	/**
-    	 * Download XML and populate a list with alarm items
-    	 * 
-    	 * @param url where to download xml
-    	 * @return
-    	 * @throws IOException
-    	 * @throws XmlPullParserException 
-    	 */
-    	private String loadXmlFromNetwork(String url) throws IOException, XmlPullParserException{
-    		
-    		InputStream stream = null;					//Represent the xml content to parse
-    		Parser parser = null;						//Parser
-    		List<Item> items = null;					//All alarm items
-    		String title = null;						//Item's title
-    		String link = null;							//Item's link
-    		DetailedInfo description = null;			//Item's description
-    		String pubDate = null;						//Item's publication date
-    		String guid = null;							//Item's guid
-    		StringBuilder htmlString = null;			//Html with xml content
-    		DateFormat formatter = null;				//Formatter for current date
-    		Calendar rightNow = null;					//Current Date
-    		
-    		//Construct html output
-    		htmlString = new StringBuilder();
-    		htmlString.append("<h3>" + getResources().getString(R.string.UIE_page_title) + "</h3>");
-    		formatter = new SimpleDateFormat("MMM dd h:mmaa");
-    		rightNow = Calendar.getInstance();
-    		htmlString.append("<em>" + getResources().getString(R.string.UIE_updated) + formatter.format(rightNow.getTime()) + "</em>");
-    		
-    		//Get stream from url
-    		//stream = downloadUrl(url);
-    		
-    		//Get it from file
-    		AssetManager am = getAssets();
-    		stream = am.open("es.rss");
-    		
-    		//Initialize parser
-    		parser = new Parser();
-    		
-    		//Get items from stream
-    		try {
-				items = parser.parse(stream);
-			} catch (XmlPullParserException e) {
-				//Nothing special
-				Log.d(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_Xml_Parser_Exception));
-				e.printStackTrace();
-			} catch (IOException e) {
-				//Nothing special
-				Log.d(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_IO_Exception));
-				e.printStackTrace();
-			}
-    		//Taking care: stream must be always closed
-    		finally{
-    			if(stream != null){
-    				stream.close();
-    			}
-    		}
-    		
-    		// Parser returns a List (called "items") of Item objects.
-    	    // Each Item object represents a alarm for a place in the XML feed.
-    	    // This section processes the items list to combine each item with HTML markup.
-    	    for (Item item : items) {       
-    	        htmlString.append("<p>");
-    	        htmlString.append(item.getTitle() + "</p>");
-    	    }
-    	    return htmlString.toString();
-    	}
-    	
-    	/**
-    	 * Given a string representation of a URL, sets up a connection and gets an input stream.
-    	 * 
-    	 * @param urlString with the rss XML-formatted
-    	 * @return
-    	 * @throws IOException 
-    	 */
-    	private InputStream downloadUrl(String urlString) throws IOException{
-    		
-    		URL url = new URL(urlString);
-    	    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    	    conn.setReadTimeout(10000 /* milliseconds */);
-    	    conn.setConnectTimeout(15000 /* milliseconds */);
-    	    conn.setRequestMethod("GET");
-    	    conn.setDoInput(true);
-    	    // Starts the query
-    	    conn.connect();
-    	    return conn.getInputStream();
-    		
-    	}
-
-    }
-
-    /**
-     * Define a Dialog Fragment where display error dialogs
-     * 
-     * @author manuel.lopez
-     *
-     */
-    public static class ErrorDialogFragment extends DialogFragment{
-    	
-    	private Dialog mDialog;			//Handle dialog field
-    	
-    	/**
-    	 * Constructor
-    	 */
-    	public ErrorDialogFragment(){
-    		super();
-    		mDialog = null;
-    	}
-    	
-    	/**
-    	 * Set the dialog to display
-    	 * 
-    	 * @param dialog
-    	 */
-    	public void setDialog (Dialog dialog){
-    		this.mDialog = dialog;
-    	}
-    	
-    	/**
-    	 * Return a dialog to the Dialog Fragment
-    	 */
-    	@Override
-    	public Dialog onCreateDialog(Bundle savedInstanceState){
-    		return mDialog;
-    	}
-    	
-    }
-
     
     /**
      * Called by Location Services if the attempt to Location Services fails
@@ -566,6 +403,190 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	@Override
 	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 		// TODO Auto-generated method stub
+		
+	}
+	
+	/*
+	 * **********************************************************************
+	 * ********************** SUBCLASSES ************************************
+	 * **********************************************************************
+	 */
+	
+    /**
+     * Class to implement the async download
+     * 
+     */
+    private class DownloadXmlTask extends AsyncTask<String, Void, String> {
+
+    	@Override
+    	protected String doInBackground(String... urls) {
+    		
+    		//Try to get the Xml formatted from web
+    		try {
+				return loadXmlFromNetwork(urls[0]);
+			//If it doesn't succeed, it shows errors
+    		}catch (XmlPullParserException e) {
+	                return getResources().getString(R.string.EEG_xml_error);
+    		} catch (IOException e) {
+                return getResources().getString(R.string.EEG_connection_error);
+            } 
+    		
+    	}
+
+    	@Override
+    	protected void onPostExecute(String result){
+            setContentView(R.layout.activity_main);
+            // Displays the HTML string in the UI via a WebView
+            WebView myWebView = (WebView) findViewById(R.id.MAmainWebView);
+            myWebView.loadData(result, "text/html", null);
+    	}
+
+    	/**
+    	 * Download XML and populate a list with alarm items
+    	 * 
+    	 * @param url where to download xml
+    	 * @return
+    	 * @throws IOException
+    	 * @throws XmlPullParserException 
+    	 */
+    	private String loadXmlFromNetwork(String url) throws IOException, XmlPullParserException{
+    		
+    		InputStream stream = null;					//Represent the xml content to parse
+    		Parser parser = null;						//Parser
+    		List<Item> items = null;					//All alarm items
+    		StringBuilder htmlString = null;			//Html with xml content
+    		DateFormat formatter = null;				//Formatter for current date
+    		Calendar rightNow = null;					//Current Date
+    		
+    		//Construct html output
+    		htmlString = new StringBuilder();
+    		htmlString.append("<h3>" + getResources().getString(R.string.UIE_page_title) + "</h3>");
+    		formatter = new SimpleDateFormat(Constants.FORMATTER, new Locale(Constants.LOCALE_LANGUAGE, Constants.LOCALE_COUNTRY));
+    		rightNow = Calendar.getInstance();
+    		htmlString.append("<em>" + getResources().getString(R.string.UIE_updated) + formatter.format(rightNow.getTime()) + "</em>");
+    		
+    		//Get stream from url
+    		stream = downloadUrl(url);
+    		
+    		//Get it from file
+    		//TODO: Remove after it downloads well from the Internet
+    		//AssetManager am = getAssets();
+    		//stream = am.open("es.rss");
+    		
+    		//Initialize parser
+    		parser = new Parser();
+    		
+    		//Get items from stream
+    		try {
+				items = parser.parse(stream);
+			} catch (XmlPullParserException e) {
+				//Nothing special
+				Log.d(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_Xml_Parser_Exception));
+				e.printStackTrace();
+			} catch (IOException e) {
+				//Nothing special
+				Log.d(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_IO_Exception));
+				e.printStackTrace();
+			}
+    		//Taking care: stream must be always closed
+    		finally{
+    			if(stream != null){
+    				stream.close();
+    			}
+    		}
+    		
+    		// Parser returns a List (called "items") of Item objects.
+    	    // Each Item object represents a alarm for a place in the XML feed.
+    	    // This section processes the items list to combine each item with HTML markup.
+    	    for (Item item : items) {       
+    	        htmlString.append("<p>");
+    	        htmlString.append(item.getTitle() + "</p>");
+    	    }
+    	    return htmlString.toString();
+    	}
+    	
+    	/**
+    	 * Given a string representation of a URL, sets up a connection and gets an input stream.
+    	 * 
+    	 * @param urlString with the rss XML-formatted
+    	 * @return
+    	 * @throws IOException 
+    	 */
+    	private InputStream downloadUrl(String urlString) throws IOException{
+    		
+    		URL url = new URL(urlString);
+    	    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    	    conn.setReadTimeout(10000 /* milliseconds */);
+    	    conn.setConnectTimeout(15000 /* milliseconds */);
+    	    conn.setRequestMethod("GET");
+    	    conn.setDoInput(true);
+    	    // Starts the query
+    	    conn.connect();
+    	    return conn.getInputStream();
+    		
+    	}
+
+    }
+	
+	/**
+     * Define a Dialog Fragment where display error dialogs
+     * 
+     * @author manuel.lopez
+     *
+     */
+    public static class ErrorDialogFragment extends DialogFragment{
+    	
+    	private Dialog mDialog;			//Handle dialog field
+    	
+    	/**
+    	 * Constructor
+    	 */
+    	public ErrorDialogFragment(){
+    		super();
+    		mDialog = null;
+    	}
+    	
+    	/**
+    	 * Set the dialog to display
+    	 * 
+    	 * @param dialog
+    	 */
+    	public void setDialog (Dialog dialog){
+    		this.mDialog = dialog;
+    	}
+    	
+    	/**
+    	 * Return a dialog to the Dialog Fragment
+    	 */
+    	@Override
+    	public Dialog onCreateDialog(Bundle savedInstanceState){
+    		return mDialog;
+    	}
+    	
+    }
+    
+    
+	/**
+	 * An AsyncTask that calls getFromLocation() in the background.
+	 * The class uses the following generic types:
+	 * Location - A {@link android.location.Location} object containing the current location,
+	 * 			  passed as the input parameter to doInBackground()
+	 * Void		- indicates that progress units are not used by this subclass
+	 * String	- An address passed to onPostExecute()
+	 * 
+	 * @author manuel.lopez
+	 *
+	 */
+	protected class GetAddressTask extends AsyncTask<Location, Void, String>{
+
+		//Store the context passed to the AsynTask when the system instantiates it
+		Context localContext;
+		
+		@Override
+		protected String doInBackground(Location... params) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 		
 	}
     

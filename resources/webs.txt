@@ -1,3 +1,11 @@
 http://developer.android.com/training/basics/network-ops/xml.html
 http://www.meteoalarm.eu/en_UK/1/0/ES-Spain.html
 http://www.ibm.com/developerworks/opensource/library/x-android/index.html
+
+<!-- para poner las propiedades y configuraciones de una aplicación directamente en un menú -->
+http://www.sgoliver.net/blog/?p=2149
+
+<!-- uso de sqlite -->
+http://developer.android.com/reference/android/database/sqlite/package-summary.html
+
+

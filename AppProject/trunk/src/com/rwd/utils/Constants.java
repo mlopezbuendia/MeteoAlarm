@@ -56,4 +56,9 @@ public final class Constants {
 	//Preferences Names
 	public static final String GENERAL_PREFERENCES = "WeatherAlarmPrefs";
 	public static final String PREF_PREFERRED_CONNECTION = "ConnectionPreferred";
+	
+	//Date format
+	public static final String FORMATTER = "dd MMM h:mmaa";
+	public static final String LOCALE_LANGUAGE = "es";
+	public static final String LOCALE_COUNTRY = "ES";
 }
