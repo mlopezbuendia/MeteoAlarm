@@ -8,38 +8,55 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
-
     <WebView
-        android:id="@+id/mainWebView"
+        android:id="@+id/MAmainWebView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignLeft="@+id/textView1"
-        android:layout_below="@+id/textView1"
         android:layout_marginLeft="23dp"
         android:layout_marginTop="100dp" />
 
     <Button
-        android:id="@+id/parseButton"
+        android:id="@+id/MAparseButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/mainWebView"
-        android:layout_below="@+id/textView1"
-        android:layout_marginTop="18dp"
-        android:text="@string/parse_button" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/UIE_parse_button" />
 
     <Button
-        android:id="@+id/setPreference"
+        android:id="@+id/MAsetPreference"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/parseButton"
-        android:layout_alignBottom="@+id/parseButton"
+        android:layout_alignBaseline="@id/MAparseButton"
+        android:layout_alignBottom="@id/MAparseButton"
         android:layout_marginLeft="39dp"
-        android:layout_toRightOf="@+id/parseButton"
-        android:text="@string/set_pref" />
+        android:layout_toRightOf="@id/MAparseButton"
+        android:text="@string/UIE_set_pref" />
+
+    <TextView
+        android:id="@+id/MAconnectionState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/MAparseButton"
+        android:layout_below="@id/MAparseButton"
+        android:text="@string/GPC_connection_state" />
+
+    <TextView
+        android:id="@+id/MAconnectionStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/MAconnectionState"
+        android:layout_below="@id/MAconnectionState"
+        android:text="@string/GPC_connection_status" />
+
+    <TextView
+        android:id="@+id/MALatLong"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/MAconnectionState"
+        android:layout_alignBottom="@id/MAconnectionState"
+        android:layout_alignRight="@id/MAmainWebView"
+        android:layout_marginRight="40dp"
+        android:text="@string/GPC_latitude_longitude" />
 
 </RelativeLayout>

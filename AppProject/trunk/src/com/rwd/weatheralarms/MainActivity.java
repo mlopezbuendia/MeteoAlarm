@@ -13,7 +13,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -23,6 +22,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -30,11 +30,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationRequest;
 import com.rwd.utils.Constants;
 import com.rwd.utils.DetailedInfo;
@@ -42,9 +43,9 @@ import com.rwd.utils.Item;
 import com.rwd.utils.LocationUtils;
 import com.rwd.utils.Parser;
 
-public class MainActivity extends FragmentActivity implements GooglePlayServicesClient.ConnectionCallbacks, 
-																  GooglePlayServicesClient.OnConnectionFailedListener,
-																  LocationListener {
+public class MainActivity extends FragmentActivity implements LocationListener, 
+																  GooglePlayServicesClient.ConnectionCallbacks, 
+																  GooglePlayServicesClient.OnConnectionFailedListener  {
 	
 	// Whether the display should be refreshed.
     private static boolean refreshDisplay = true; 
@@ -58,29 +59,27 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
     // Whether there is a mobile connection.
     private static boolean mobileConnected = false;
     
-    //Buttons references
+    //Location Parameters and Client using for storing location in the activity
+    private LocationRequest mLocationRequest = null;
+    private LocationClient mLocationClient = null;
+    
+    //UI Handlers
+    private TextView mConnectionState;
+    private TextView mConnectionStatus;
+    private TextView mLatLong;
     private static Button parseButton = null;
     private static Button prefButton = null;
-    
-    //Location Client using for storing location in the activity
-    private LocationRequest mLocationRequest = null;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        /*
-         * Setting location client
-         */
-        //Create a new location request, using the enclosing class to handle callbacks
-        mLocationRequest = LocationRequest.create();
-        //Set update interval
-        mLocationRequest.setInterval(LocationUtils.UPDATE_INTERVAL_IN_MILLISECONDS);
-        //Use high accuracy
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        //Sets interval ceiling to one minute
-        mLocationRequest.setFastestInterval(LocationUtils.FAST_INTERVAL_CEILING_IN_MILLISECONDS);
+        //Getting UI elements' references 
+        getUIElements();
+        
+        //Setting location client and parameters
+        iniLocation();
                 
         //Get initial Preferences
         sPref = getSharedPreferences(Constants.GENERAL_PREFERENCES, Context.MODE_PRIVATE);
@@ -89,7 +88,7 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
         mobileConnected = true;
         
         //Set parse button action
-        parseButton = (Button)findViewById(R.id.parseButton);
+        parseButton = (Button)findViewById(R.id.MAparseButton);
         parseButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -100,7 +99,7 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
 		});
         
         //Set prefs button action
-        prefButton = (Button)findViewById(R.id.setPreference);
+        prefButton = (Button)findViewById(R.id.MAsetPreference);
         prefButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -112,6 +111,37 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
     }
     
     /**
+     * Loads the references for each UI Element of the application
+     */
+    private void getUIElements() {
+		
+    	//Connection info text views
+    	mConnectionState = (TextView) findViewById(R.id.MAconnectionState);
+    	mConnectionStatus = (TextView) findViewById(R.id.MAconnectionStatus);
+    	mLatLong = (TextView) findViewById(R.id.MALatLong);
+	}
+
+	/**
+     * Set location parameters and return a location client into the global variables
+     * 
+     * @return location client
+     */
+    private void iniLocation() {
+    	
+    	//Create a new location parameters, using the enclosing class to handle callbacks
+        mLocationRequest = LocationRequest.create();
+        //Set update interval
+        mLocationRequest.setInterval(LocationUtils.UPDATE_INTERVAL_IN_MILLISECONDS);
+        //Use high accuracy
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        //Sets interval ceiling to one minute
+        mLocationRequest.setFastestInterval(LocationUtils.FAST_INTERVAL_CEILING_IN_MILLISECONDS);
+        
+        //Create a new location client, using the enclosing class to handle callbacks
+        mLocationClient = new LocationClient(this, this, this);
+	}
+
+	/**
      * Called when Activity becomes visible
      */
     @Override
@@ -131,9 +161,6 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
 		super.onStop();
 	}
 
-
-
-
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -141,6 +168,13 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
         return true;
     }
     
+	/**
+	 * Handle results returned to this Activity by other Activities started with
+     * startActivityForResult(). In particular, the method onConnectionFailed() in
+     * LocationUpdateRemover and LocationUpdateRequester may call startResolutionForResult() to
+     * start an Activity that handles Google Play services problems. The result of this
+     * call returns here, to onActivityResult.
+	 */
     @Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -148,26 +182,51 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
 		//Decide what to do based on the original request code
 		switch(requestCode){
 			
-		//Call to Google Play
-		case Constants.CONNECTION_FAILURE_RESOLUTION_REQUEST:
+			//Call to Google Play in the method onConnectionFailed
+			case Constants.CONNECTION_FAILURE_RESOLUTION_REQUEST:
 			
-			//If the result code of the activity called is ok, try to connect again
-			switch(resultCode){
+				switch(resultCode){
 			
-			case Activity.RESULT_OK:
+				//If the result code of the activity called is ok, try to connect again
+				case Activity.RESULT_OK:
 				
-				//TODO: try the request again
+					//Log the result
+					Log.d(Constants.APP_TAG, getString(R.string.GPC_resolved));
+						
+					//Display the result
+					mConnectionState.setText(R.string.GPC_connected);
+					mConnectionStatus.setText(R.string.GPC_resolved);
+						
 				break;
 				
+				//If any other result was returned by Google Play Services...
+				default:
+					
+					//Log the result
+					Log.d(Constants.APP_TAG, getString(R.string.GPC_no_resolution));
+					
+					//Display the result
+					mConnectionState.setText(R.string.GPC_disconnected);
+					mConnectionState.setTag(R.string.GPC_no_resolution);
+				
+				break;
 			}
+				
+			//If any other request code was received
+			default:
+				
+				//Report that this Activity received an unknown requestCode
+				Log.d(Constants.APP_TAG_ERROR, getString(R.string.EEG_unknown_activity_request_code, requestCode));
+				
+				break;
 		}
 		
 	}
     
     /**
-     * Checks if Google Play Services are connected
+     * Checks if Google Play Services is connected
      * 
-     * @return
+     * @return true if Google Play services is available, otherwise false
      */
     private boolean servicesConnected(){
     	
@@ -182,24 +241,17 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
     	//If Google Play service is available
     	if (ConnectionResult.SUCCESS == resultCode){
     		//In debug mode, log the status
-    		Log.d("Location Updates", "Google Play is available");
+    		Log.d(Constants.APP_TAG, getString(R.string.GPC_play_services_available));
+    		
+    		//Continue
     		result = true;
     	}
+    	//Google Play Services is not available for some reason
     	else{
-    		//Get error code
-    		errorCode = connectionResult.getErrorCode();
-    		//Get the error dialog from Google Play Services
-    		errorDialog = GooglePlayServicesUtil.getErrorDialog(errorCode, this, Constants.CONNECTION_FAILURE_RESOLUTION_REQUEST);
+    		//Get the error dialog from Google Play Services and show the error
+    		showErrorDialog(errorCode);
     		
-    		//If Google Play Services can provide an error dialog
-    		if(errorDialog != null){
-    			//Create a new DialogFragment for the error dialog
-    			errorFragment = new ErrorDialogFragment();
-    			//Set the dialog in the fragment
-    			errorFragment.setDialog(errorDialog);
-    			//Show the dialog in the fragment
-    			errorFragment.show(getSupportFragmentManager(), "Location Updates");
-    		}
+    		result = false;
     	}
     	
     	return result;
@@ -216,9 +268,11 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
     	Location loc = null;				//For managing current location
     	String prefCon = null;				//Network connection preferred by user
     	
-    	//Shows the current location
-    	loc = mLocationClient.getLastLocation();
-    	Toast.makeText(this, loc.toString(), Toast.LENGTH_LONG).show();
+    	//Shows the current location if Google Play Services is available
+    	if(servicesConnected()){
+    		loc = mLocationClient.getLastLocation();
+    		mLatLong.setText(LocationUtils.getLatLng(this, loc));
+    	}
     	
     	//Get network connection preferred
     	prefCon = sPref.getString(Constants.PREF_PREFERRED_CONNECTION, Constants.ANY);
@@ -229,9 +283,8 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
     	else if(prefCon.equals(Constants.WIFI) && (wifiConnected)){
     		new DownloadXmlTask().execute(Constants.URL);
     	}
-    	else{
-    		//TODO: Show error in screen 
-    		Log.d("ERROR", "Not able to download XML");
+    	else{ 
+    		Log.d(Constants.APP_TAG_ERROR, getString(R.string.EEG_Xml_Not_Downloaded));
     	}
     	
     }
@@ -250,9 +303,9 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
 				return loadXmlFromNetwork(urls[0]);
 			//If it doesn't succeed, it shows errors
     		}catch (XmlPullParserException e) {
-	                return getResources().getString(R.string.xml_error);
+	                return getResources().getString(R.string.EEG_xml_error);
     		} catch (IOException e) {
-                return getResources().getString(R.string.connection_error);
+                return getResources().getString(R.string.EEG_connection_error);
             } 
     		
     	}
@@ -261,7 +314,7 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
     	protected void onPostExecute(String result){
             setContentView(R.layout.activity_main);
             // Displays the HTML string in the UI via a WebView
-            WebView myWebView = (WebView) findViewById(R.id.mainWebView);
+            WebView myWebView = (WebView) findViewById(R.id.MAmainWebView);
             myWebView.loadData(result, "text/html", null);
     	}
 
@@ -289,10 +342,10 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
     		
     		//Construct html output
     		htmlString = new StringBuilder();
-    		htmlString.append("<h3>" + getResources().getString(R.string.page_title) + "</h3>");
+    		htmlString.append("<h3>" + getResources().getString(R.string.UIE_page_title) + "</h3>");
     		formatter = new SimpleDateFormat("MMM dd h:mmaa");
     		rightNow = Calendar.getInstance();
-    		htmlString.append("<em>" + getResources().getString(R.string.updated) + formatter.format(rightNow.getTime()) + "</em>");
+    		htmlString.append("<em>" + getResources().getString(R.string.UIE_updated) + formatter.format(rightNow.getTime()) + "</em>");
     		
     		//Get stream from url
     		//stream = downloadUrl(url);
@@ -309,11 +362,11 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
 				items = parser.parse(stream);
 			} catch (XmlPullParserException e) {
 				//Nothing special
-				Log.d("ERROR", "XmlParserException");
+				Log.d(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_Xml_Parser_Exception));
 				e.printStackTrace();
 			} catch (IOException e) {
 				//Nothing special
-				Log.d("ERROR", "IO Exception");
+				Log.d(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_IO_Exception));
 				e.printStackTrace();
 			}
     		//Taking care: stream must be always closed
@@ -422,13 +475,28 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
 	}
 
 	/**
+	 * Report location updates to the UI
+	 * 
+	 * @param location The updated location
+	 */
+	@Override
+	public void onLocationChanged(Location location) {
+
+		//Report to the UI that the location was updated
+		mConnectionStatus.setText(R.string.GPC_location_updated);
+		
+		//Show the new location
+		mLatLong.setText(LocationUtils.getLatLng(this, location));
+	}
+
+	/**
 	 * Called by Location Services when the request to connect the client finishes successfully. At this point, you can
 	 * request the current location or start periodic updates
 	 */
 	@Override
 	public void onConnected(Bundle connectionHint) {
 		//Display the connection status
-		Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+		mConnectionStatus.setText(R.string.GPC_connected);
 	}
 
 	/**
@@ -438,7 +506,7 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
 	@Override
 	public void onDisconnected() {
 		//Display the connection status
-		Toast.makeText(this, "Disconnected. Please re-connect", Toast.LENGTH_LONG).show();
+		mConnectionStatus.setText(R.string.GPC_disconnected);
 	}
 	
 	/**
@@ -451,6 +519,54 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
 		SharedPreferences.Editor editor = sPref.edit();
 		editor.putString(Constants.PREF_PREFERRED_CONNECTION, Constants.ANY);
 		editor.commit();
+	}
+	
+	/**
+	 * Show a dialog returned by Google Play Services for the connection error code
+	 * 
+	 * @param errorCode An error code returned from onConnectionFailed
+	 */
+	private void showErrorDialog(int errorCode){
+		
+		Dialog errorDialog = null;						//Dialog where to show the error
+		ErrorDialogFragment errorFragment = null;		//Fragment where to show the error dialog
+		
+		//Get the error dialog from Google Play Services
+		errorDialog = GooglePlayServicesUtil.getErrorDialog(
+				errorCode,
+				this,
+				Constants.CONNECTION_FAILURE_RESOLUTION_REQUEST);
+				
+		//If Google Play services can provide an error dialog
+		if(errorDialog != null){
+			
+			//Create a new DialogFragment in which to show the error dialog
+			errorFragment = new ErrorDialogFragment();
+			
+			//Set the dialog in the Dialog Fragment
+			errorFragment.setDialog(errorDialog);
+			
+			//Show the error dialog in the DialogFragment
+			errorFragment.show(getSupportFragmentManager(), Constants.APP_TAG);
+		}
+	}
+
+	@Override
+	public void onProviderDisabled(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onProviderEnabled(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+		// TODO Auto-generated method stub
+		
 	}
     
 }

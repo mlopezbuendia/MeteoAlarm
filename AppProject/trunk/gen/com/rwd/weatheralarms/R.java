@@ -182,16 +182,18 @@ containing a value of this type.
         public static final int ic_launcher=0x7f020018;
     }
     public static final class id {
-        public static final int action_settings=0x7f050009;
+        public static final int MALatLong=0x7f05000a;
+        public static final int MAconnectionState=0x7f050008;
+        public static final int MAconnectionStatus=0x7f050009;
+        public static final int MAmainWebView=0x7f050005;
+        public static final int MAparseButton=0x7f050006;
+        public static final int MAsetPreference=0x7f050007;
+        public static final int action_settings=0x7f05000b;
         public static final int hybrid=0x7f050004;
-        public static final int mainWebView=0x7f050006;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
-        public static final int parseButton=0x7f050007;
         public static final int satellite=0x7f050002;
-        public static final int setPreference=0x7f050008;
         public static final int terrain=0x7f050003;
-        public static final int textView1=0x7f050005;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
@@ -200,8 +202,35 @@ containing a value of this type.
         public static final int main=0x7f090000;
     }
     public static final class string {
-        public static final int action_settings=0x7f060016;
-        public static final int app_name=0x7f060015;
+        public static final int EEG_IO_Exception=0x7f06001d;
+        public static final int EEG_Xml_Not_Downloaded=0x7f06001f;
+        public static final int EEG_Xml_Parser_Exception=0x7f06001e;
+        /**  END Texts for UI Elements 
+ Exceptions, Errors and General App Info 
+         */
+        public static final int EEG_connection_error=0x7f06001b;
+        public static final int EEG_unknown_activity_request_code=0x7f060020;
+        public static final int EEG_xml_error=0x7f06001c;
+        public static final int GPC_connected=0x7f060022;
+        public static final int GPC_connection_state=0x7f060023;
+        public static final int GPC_connection_status=0x7f060024;
+        public static final int GPC_disconnected=0x7f060026;
+        public static final int GPC_latitude_longitude=0x7f060028;
+        public static final int GPC_location_updated=0x7f060029;
+        public static final int GPC_no_resolution=0x7f060025;
+        public static final int GPC_play_services_available=0x7f060027;
+        /**  END Exceptions, Errors and General App Info 
+ Google Play Connection Info 
+         */
+        public static final int GPC_resolved=0x7f060021;
+        public static final int UIE_action_settings=0x7f060016;
+        /**  Texts for UI Elements 
+         */
+        public static final int UIE_app_name=0x7f060015;
+        public static final int UIE_page_title=0x7f060017;
+        public static final int UIE_parse_button=0x7f060019;
+        public static final int UIE_set_pref=0x7f06001a;
+        public static final int UIE_updated=0x7f060018;
         /**   Title for notification shown when GooglePlayServices is unavailable [CHAR LIMIT=70] 
          */
         public static final int auth_client_availability_notification_title=0x7f06000f;
@@ -266,8 +295,6 @@ containing a value of this type.
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
         public static final int common_signin_button_text_long=0x7f06000e;
-        public static final int connection_error=0x7f06001a;
-        public static final int hello_world=0x7f060017;
         /**  Location client code resources (prefix with location_client) 
 
         Begin strings for location.reporting
@@ -279,11 +306,6 @@ containing a value of this type.
         public static final int location_client_ulr_inactive_age_under_13=0x7f060012;
         public static final int location_client_ulr_inactive_age_unknown=0x7f060013;
         public static final int location_client_ulr_inactive_unknown_restriction=0x7f060014;
-        public static final int page_title=0x7f060018;
-        public static final int parse_button=0x7f06001c;
-        public static final int set_pref=0x7f06001d;
-        public static final int updated=0x7f060019;
-        public static final int xml_error=0x7f06001b;
     }
     public static final class style {
         /** 

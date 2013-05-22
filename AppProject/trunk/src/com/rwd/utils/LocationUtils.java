@@ -1,5 +1,10 @@
 package com.rwd.utils;
 
+import com.rwd.weatheralarms.R;
+
+import android.content.Context;
+import android.location.Location;
+
 public final class LocationUtils {
 	
 	//Update interval in seconds
@@ -18,4 +23,38 @@ public final class LocationUtils {
 	
 	//Location Preferences
 	public static final String LOCATION_PREFERENCES = "LocationPreferences";
+	
+	//Create an empty String for initializing strings
+	public static final String EMPTY_STRING = new String();
+	
+	/**
+	 * Get the latitude and longitude from the Location object returned by Location Services
+	 * 
+	 * @param context
+	 * @param currentLocation A location object containing the current location
+	 * @return The latitude and longitude of the current location, or null if no location is available
+	 */
+	public static String getLatLng(Context context, Location currentLocation){
+		
+		String result = null;
+		
+		//If the location is valid
+		if(currentLocation != null){
+			
+			//Return the latitude and longitude as strings
+			result = context.getString(
+					R.string.GPC_latitude_longitude,
+					currentLocation.getLatitude(),
+					currentLocation.getLongitude());
+					
+		}
+		else{
+			
+			//Otherwise, return the empty string;
+			result = EMPTY_STRING;
+		}
+		
+		return result;
+		
+	}
 }

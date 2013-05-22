@@ -8,6 +8,15 @@ package com.rwd.utils;
  */
 
 public final class Constants {
+	
+	//App tag
+	public static final String APP_TAG = "WeatherAlarms";
+	
+	//Exception tag
+	public static final String APP_TAG_EXCEPTION = "WeatherAlarmsException";
+	
+	//Error tag
+	public static final String APP_TAG_ERROR = "WeatherAlarmsError";
 
 	//Namespace used in parser
 	public static final String ns = null;
