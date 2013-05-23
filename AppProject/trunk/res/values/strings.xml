@@ -13,10 +13,12 @@
 	<!-- Exceptions, Errors and General App Info -->
 	<string name="EEG_connection_error">Connection Error while trying to fetch xml content</string>
 	<string name="EEG_xml_error">Error while parsing xml content</string>
-	<string name="EEG_IO_Exception">I/O Exception ocurred</string>
-	<string name="EEG_Xml_Parser_Exception">XML Parser Exception ocurred</string>
+	<string name="EEG_IO_Exception">I/O Exception occurred</string>
+	<string name="EEG_Xml_Parser_Exception">XML Parser Exception occurred</string>
 	<string name="EEG_Xml_Not_Downloaded">Xml can not be downloaded</string>
 	<string name="EEG_unknown_activity_request_code">Unknown Activity Request Code received</string>
+	<string name="EEG_illegal_argument_exception">Illegal Argument Exception occurred</string>
+	<string name="EEG_interrupted_exception">Interrupted Exception occurred</string>
 	<!-- END Exceptions, Errors and General App Info -->
 	
 	<!-- Google Play Connection Info -->
@@ -27,8 +29,14 @@
 	<string name="GPC_no_resolution">Google Play Services Connection not resolved</string>
 	<string name="GPC_disconnected">Google Play Services Disconnected</string>
 	<string name="GPC_play_services_available">Google Play Services is available for use</string>
-	<string name="GPC_latitude_longitude">Latitude + Longitude: </string>
-	<string name="GPC_location_updated">Location was updated by the system</string>
 	<!-- END Google Play Connection Info -->
+	
+	<!-- Location Info -->
+	<string name="LCI_address_output_string">Address in text: </string>
+	<string name="LCI_latitude_longitude">Latitude + Longitude: </string>
+	<string name="LCI_location_updated">Location was updated by the system</string>
+	<string name="LCI_no_address_found">No Address was found</string>
+	<string name="LCI_no_geocoder_available">No Geocoder available for retrieving current city</string>
+	<!-- END Location Info -->
     
 </resources>

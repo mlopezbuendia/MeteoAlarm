@@ -183,12 +183,13 @@ containing a value of this type.
     }
     public static final class id {
         public static final int MALatLong=0x7f05000a;
+        public static final int MAaddress=0x7f05000b;
         public static final int MAconnectionState=0x7f050008;
         public static final int MAconnectionStatus=0x7f050009;
         public static final int MAmainWebView=0x7f050005;
         public static final int MAparseButton=0x7f050006;
         public static final int MAsetPreference=0x7f050007;
-        public static final int action_settings=0x7f05000b;
+        public static final int action_settings=0x7f05000c;
         public static final int hybrid=0x7f050004;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
@@ -209,20 +210,28 @@ containing a value of this type.
  Exceptions, Errors and General App Info 
          */
         public static final int EEG_connection_error=0x7f06001b;
+        public static final int EEG_illegal_argument_exception=0x7f060021;
+        public static final int EEG_interrupted_exception=0x7f060022;
         public static final int EEG_unknown_activity_request_code=0x7f060020;
         public static final int EEG_xml_error=0x7f06001c;
-        public static final int GPC_connected=0x7f060022;
-        public static final int GPC_connection_state=0x7f060023;
-        public static final int GPC_connection_status=0x7f060024;
-        public static final int GPC_disconnected=0x7f060026;
-        public static final int GPC_latitude_longitude=0x7f060028;
-        public static final int GPC_location_updated=0x7f060029;
-        public static final int GPC_no_resolution=0x7f060025;
-        public static final int GPC_play_services_available=0x7f060027;
+        public static final int GPC_connected=0x7f060024;
+        public static final int GPC_connection_state=0x7f060025;
+        public static final int GPC_connection_status=0x7f060026;
+        public static final int GPC_disconnected=0x7f060028;
+        public static final int GPC_no_resolution=0x7f060027;
+        public static final int GPC_play_services_available=0x7f060029;
         /**  END Exceptions, Errors and General App Info 
  Google Play Connection Info 
          */
-        public static final int GPC_resolved=0x7f060021;
+        public static final int GPC_resolved=0x7f060023;
+        /**  END Google Play Connection Info 
+ Location Info 
+         */
+        public static final int LCI_address_output_string=0x7f06002a;
+        public static final int LCI_latitude_longitude=0x7f06002b;
+        public static final int LCI_location_updated=0x7f06002c;
+        public static final int LCI_no_address_found=0x7f06002d;
+        public static final int LCI_no_geocoder_available=0x7f06002e;
         public static final int UIE_action_settings=0x7f060016;
         /**  Texts for UI Elements 
          */

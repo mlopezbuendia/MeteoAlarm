@@ -12,16 +12,19 @@ import java.util.Locale;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.content.res.AssetManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -32,6 +35,7 @@ import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -39,7 +43,6 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationRequest;
 import com.rwd.utils.Constants;
-import com.rwd.utils.DetailedInfo;
 import com.rwd.utils.Item;
 import com.rwd.utils.LocationUtils;
 import com.rwd.utils.Parser;
@@ -51,6 +54,13 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     // General Preferences && Location Specific Preferences
     private static SharedPreferences sPref = null;
     private static SharedPreferences locPref = null;
+    
+    //Current Province or Sub-Admin Area
+    private String currentProvince = null;
+    
+    //Task handlers
+    private AsyncTask downloadXmlHandler = null;
+    private AsyncTask getAddressHandler = null;
     
     // Whether there is a Wi-Fi connection.
     private static boolean wifiConnected = false; 
@@ -65,6 +75,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     private TextView mConnectionState;
     private TextView mConnectionStatus;
     private TextView mLatLong;
+    private TextView mAddress;
     private static Button parseButton = null;
     private static Button prefButton = null;
 	
@@ -117,6 +128,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	mConnectionState = (TextView) findViewById(R.id.MAconnectionState);
     	mConnectionStatus = (TextView) findViewById(R.id.MAconnectionStatus);
     	mLatLong = (TextView) findViewById(R.id.MALatLong);
+    	mAddress = (TextView) findViewById(R.id.MAaddress);
 	}
 
 	/**
@@ -260,23 +272,19 @@ public class MainActivity extends FragmentActivity implements LocationListener,
      */
     private void loadInfo(){
     	
-    	Location loc = null;				//For managing current location
     	String prefCon = null;				//Network connection preferred by user
     	
-    	//Shows the current location if Google Play Services is available
-    	if(servicesConnected()){
-    		loc = mLocationClient.getLastLocation();
-    		mLatLong.setText(LocationUtils.getLatLng(this, loc));
-    	}
+    	//Show current city
+    	getAddress();
     	
     	//Get network connection preferred
     	prefCon = sPref.getString(Constants.PREF_PREFERRED_CONNECTION, Constants.ANY);
     	
     	if(prefCon.equals(Constants.ANY) && (wifiConnected || mobileConnected)) {
-    		new DownloadXmlTask().execute(Constants.URL);
+    		downloadXmlHandler = new DownloadXmlTask().execute(Constants.URL);
     	}
     	else if(prefCon.equals(Constants.WIFI) && (wifiConnected)){
-    		new DownloadXmlTask().execute(Constants.URL);
+    		downloadXmlHandler = new DownloadXmlTask().execute(Constants.URL);
     	}
     	else{ 
     		Log.d(Constants.APP_TAG_ERROR, getString(R.string.EEG_Xml_Not_Downloaded));
@@ -320,7 +328,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	public void onLocationChanged(Location location) {
 
 		//Report to the UI that the location was updated
-		mConnectionStatus.setText(R.string.GPC_location_updated);
+		mConnectionStatus.setText(R.string.LCI_location_updated);
 		
 		//Show the new location
 		mLatLong.setText(LocationUtils.getLatLng(this, location));
@@ -386,6 +394,36 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			//Show the error dialog in the DialogFragment
 			errorFragment.show(getSupportFragmentManager(), Constants.APP_TAG);
 		}
+	}
+	
+	/**
+	 * Get the address of the current location, using reverse geocoding. This only works if a geocoding service is available
+	 *  
+	 */
+	//For Eclipse with ADT, suppress warnings about Geocoder.isPresent()
+	@SuppressLint("NewApi")
+	private void getAddress(){
+		
+		Location loc = null;				//Current location
+		
+		//In Gingerbread and later, use Geocoder.isPresent() to see if a geocoder is available
+		if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) && !(Geocoder.isPresent())){
+			//No geocoder is present. Issue an error message
+			Toast.makeText(this, R.string.LCI_no_geocoder_available, Toast.LENGTH_LONG).show();
+			return;
+		}
+		
+    	//Shows the current location if Google Play Services is available
+    	if(servicesConnected()){
+    		
+    		//Get the current location
+    		loc = mLocationClient.getLastLocation();
+    		mLatLong.setText(LocationUtils.getLatLng(this, loc));
+    		
+    		//Start the background task to retrieve the current city
+    		getAddressHandler = (new MainActivity.GetAddressTask(this)).execute(loc);
+    	}
+		
 	}
 
 	@Override
@@ -467,12 +505,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     		
     		//Get stream from url
     		stream = downloadUrl(url);
-    		
-    		//Get it from file
-    		//TODO: Remove after it downloads well from the Internet
-    		//AssetManager am = getAssets();
-    		//stream = am.open("es.rss");
-    		
+    		    		
     		//Initialize parser
     		parser = new Parser();
     		
@@ -495,14 +528,49 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     			}
     		}
     		
+    		//Get current province from getAddressTask
+    		currentProvince = getCurrentProvince();
+    		
+    		//If we got the current province without errors
+    		if (currentProvince != null){
+    			fadacbadfas
+    		}
+	    	   		
     		// Parser returns a List (called "items") of Item objects.
     	    // Each Item object represents a alarm for a place in the XML feed.
-    	    // This section processes the items list to combine each item with HTML markup.
-    	    for (Item item : items) {       
+    	    // This section processes selects the item for current province
+    	    for (Item item : items) { 
     	        htmlString.append("<p>");
     	        htmlString.append(item.getTitle() + "</p>");
     	    }
     	    return htmlString.toString();
+    	}
+    	
+    	/**
+    	 * This methods waits for getAddressTask to be completed if it is necessary and after that returns the current
+    	 * province from the result of the task
+    	 * 
+    	 * @return null it there was an error with getAddressTask or the name of the current province based on current location
+    	 */
+    	private String getCurrentProvince(){
+    		//Checks if getAddressTask is finished
+	    	if(getAddressHandler.getStatus() == AsyncTask.Status.RUNNING){
+	    		//If it is running, wait for 0,1 seconds
+	    		try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					//Register log and print stacktrace
+					Log.e(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_interrupted_exception));
+					e.printStackTrace();
+				}
+	    	}
+    		//If the getAddressTask finished...
+	    	else{
+	    		//We get current province
+
+	    		
+	    		//If it's not null
+	    	}
     	}
     	
     	/**
@@ -582,11 +650,104 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		//Store the context passed to the AsynTask when the system instantiates it
 		Context localContext;
 		
+		/**
+		 * Constructor called by the system to instantiate the task 
+		 */
+		public GetAddressTask(Context context) {
+			
+			//Required by the semantics of AsyncTask
+			super();
+			
+			//Set a context for the background task
+			localContext = context;
+		}
+
+
+		/**
+		 * Get a geocoding service instance, pass latitude and longitude to it, format the returned address, and return
+		 * the address to the UI thread
+		 * 
+		 */
 		@Override
 		protected String doInBackground(Location... params) {
-			// TODO Auto-generated method stub
-			return null;
+			
+			Geocoder geocoder = null;					//Geocoder for get address from location
+			Location location = null;					//Location passed by parameters
+			List<Address> addresses = null;				//List to contain the result address
+			Address address = null;						//Each one of the addresses' item
+			String result = null;
+			
+			//Get a new geocoding service instance, set for localized addresses.  
+			geocoder = new Geocoder(localContext, Locale.getDefault());
+			
+			//Get the current location from the input parameter list
+			location = params[0];
+			
+			//Try to get an address for the current location. Catch IO or network problems
+			try{
+				
+				/*
+				 * Call the synchronous getFromLocation() method with the latitude and longitude of the current location.
+				 * Return at most 1 address
+				 */
+				addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+			
+			//Catch network or other I/O problems
+			}catch (IOException exception1){
+				
+				//Log an error and return an error message
+				Log.e(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_IO_Exception));
+				
+				//Print the stack trace
+				exception1.printStackTrace();
+				
+				//Return an error message
+				result = getString(R.string.EEG_IO_Exception);
+			
+			//Catch incorrect latitude or longitude values
+			}catch (IllegalArgumentException exception2){
+				
+				//Construct a message containing the invalid arguments
+				result = getString(R.string.EEG_illegal_argument_exception) + 
+						           String.valueOf(location.getLatitude()) + 
+						           String.valueOf(location.getLongitude());
+				
+				//Log the error and print the stack trace
+				Log.e(Constants.APP_TAG_EXCEPTION, result);
+				exception2.printStackTrace();
+			}
+			
+			//If the reverse geocode returned an address
+			if((addresses != null) && (addresses.size() > 0)){
+				
+				//Get the first address (we forced only 1 result)
+				address = addresses.get(0);
+				
+				//We are only interested in the "subAdminArea" or "Provincia"
+				result = address.getSubAdminArea();
+							  				
+				//Debugger info for the selected address
+				Log.d(Constants.APP_TAG, result);
+			}
+			//If there aren't any address, post a message
+			else{
+				result = getString(R.string.LCI_no_address_found);
+			}
+			
+			return result;
 		}
+
+
+		/**
+		 * A method that's called once doInBackground() completes. Set the text of the UI element that displays the address.
+		 * This method runs on the UI thread.
+		 */
+		@Override
+		protected void onPostExecute(String result) {
+
+			//Set the address in the UI
+			mAddress.setText(result);
+		}	
 		
 	}
     

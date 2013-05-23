@@ -42,7 +42,7 @@ public final class LocationUtils {
 		if(currentLocation != null){
 			
 			//Return the latitude and longitude as strings
-			result = R.string.GPC_latitude_longitude + 
+			result = R.string.LCI_latitude_longitude + 
 					 String.valueOf(currentLocation.getLatitude()) +
 					 String.valueOf(currentLocation.getLongitude());
 		}

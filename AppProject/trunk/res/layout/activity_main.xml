@@ -57,6 +57,14 @@
         android:layout_alignBottom="@id/MAconnectionState"
         android:layout_alignRight="@id/MAmainWebView"
         android:layout_marginRight="40dp"
-        android:text="@string/GPC_latitude_longitude" />
+        android:text="@string/LCI_latitude_longitude" />
+
+    <TextView
+        android:id="@+id/MAaddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/MAconnectionStatus"
+        android:layout_alignRight="@id/MAmainWebView"
+        android:text="@string/LCI_address_output_string" />
 
 </RelativeLayout>

@@ -1,6 +1,9 @@
+<!-- XML Parser -->
 http://developer.android.com/training/basics/network-ops/xml.html
-http://www.meteoalarm.eu/en_UK/1/0/ES-Spain.html
 http://www.ibm.com/developerworks/opensource/library/x-android/index.html
+
+<!-- Meteo - weather pages -->
+http://www.meteoalarm.eu/en_UK/1/0/ES-Spain.html
 
 <!-- para poner las propiedades y configuraciones de una aplicación directamente en un menú -->
 http://www.sgoliver.net/blog/?p=2149
