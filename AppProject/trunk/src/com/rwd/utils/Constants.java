@@ -61,4 +61,8 @@ public final class Constants {
 	public static final String FORMATTER = "dd MMM h:mmaa";
 	public static final String LOCALE_LANGUAGE = "es";
 	public static final String LOCALE_COUNTRY = "ES";
+	
+	//Time to be waiting for current location
+	public static final int LOC_MAX_CYCLES_WAIT = 5;
+	public static final int LOC_CYCLE_TIME_MILLIS = 1000;
 }

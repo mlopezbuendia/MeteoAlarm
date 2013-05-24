@@ -8,6 +8,7 @@
     <string name="UIE_updated">Updated</string>
 	<string name="UIE_parse_button">Parse</string>
 	<string name="UIE_set_pref">Set Prefs</string>
+	<string name="UIE_xml_date">Last update: </string>
 	<!-- END Texts for UI Elements -->
 	
 	<!-- Exceptions, Errors and General App Info -->
@@ -37,6 +38,7 @@
 	<string name="LCI_location_updated">Location was updated by the system</string>
 	<string name="LCI_no_address_found">No Address was found</string>
 	<string name="LCI_no_geocoder_available">No Geocoder available for retrieving current city</string>
+	<string name="LCI_location_disconnected">Location Service Disconnected. Reconnecting...</string>
 	<!-- END Location Info -->
     
 </resources>

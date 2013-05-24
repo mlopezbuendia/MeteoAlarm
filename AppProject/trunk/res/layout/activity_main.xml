@@ -1,70 +1,51 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <WebView
-        android:id="@+id/MAmainWebView"
+    <TextView
+        android:id="@+id/MAxmlDate"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="23dp"
-        android:layout_marginTop="100dp" />
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/MAaddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/MAparseButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
         android:text="@string/UIE_parse_button" />
 
     <Button
         android:id="@+id/MAsetPreference"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/MAparseButton"
-        android:layout_alignBottom="@id/MAparseButton"
-        android:layout_marginLeft="39dp"
-        android:layout_toRightOf="@id/MAparseButton"
         android:text="@string/UIE_set_pref" />
 
-    <TextView
-        android:id="@+id/MAconnectionState"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/MAparseButton"
-        android:layout_below="@id/MAparseButton"
-        android:text="@string/GPC_connection_state" />
+    <ProgressBar
+        android:id="@+id/MAinitialLoading"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:indeterminate="true"
+        android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/MAconnectionStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@id/MAconnectionState"
-        android:layout_below="@id/MAconnectionState"
-        android:text="@string/GPC_connection_status" />
+    <WebView
+        android:id="@+id/MAmainWebView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginLeft="23dp"
+        android:layout_marginTop="100dp"
+        android:layout_weight="0.79" />
 
-    <TextView
-        android:id="@+id/MALatLong"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/MAconnectionState"
-        android:layout_alignBottom="@id/MAconnectionState"
-        android:layout_alignRight="@id/MAmainWebView"
-        android:layout_marginRight="40dp"
-        android:text="@string/LCI_latitude_longitude" />
-
-    <TextView
-        android:id="@+id/MAaddress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/MAconnectionStatus"
-        android:layout_alignRight="@id/MAmainWebView"
-        android:text="@string/LCI_address_output_string" />
-
-</RelativeLayout>
+</LinearLayout>

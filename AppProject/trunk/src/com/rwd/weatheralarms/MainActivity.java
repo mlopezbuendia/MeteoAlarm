@@ -34,6 +34,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,8 +54,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 																  GooglePlayServicesClient.OnConnectionFailedListener  {
 	
     // General Preferences && Location Specific Preferences
-    private static SharedPreferences sPref = null;
-    private static SharedPreferences locPref = null;
+    private SharedPreferences sPref = null;
+    private SharedPreferences locPref = null;
     
     //Current Province or Sub-Admin Area
     private String currentProvince = null;
@@ -63,21 +65,20 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     private AsyncTask getAddressHandler = null;
     
     // Whether there is a Wi-Fi connection.
-    private static boolean wifiConnected = false; 
+    private boolean wifiConnected = false; 
     // Whether there is a mobile connection.
-    private static boolean mobileConnected = false;
+    private boolean mobileConnected = false;
     
     //Location Parameters and Client using for storing location in the activity
     private LocationRequest mLocationRequest = null;
     private LocationClient mLocationClient = null;
     
     //UI Handlers
-    private TextView mConnectionState;
-    private TextView mConnectionStatus;
-    private TextView mLatLong;
-    private TextView mAddress;
-    private static Button parseButton = null;
-    private static Button prefButton = null;
+    private ProgressBar mProgressBar;
+    TextView mLastUpdate;
+    TextView mAddress;
+    private Button parseButton = null;
+    private Button prefButton = null;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,9 +97,20 @@ public class MainActivity extends FragmentActivity implements LocationListener,
         
         mobileConnected = true;
         
-        //Set parse button action
-        parseButton = (Button)findViewById(R.id.MAparseButton);
-        parseButton.setOnClickListener(new OnClickListener() {
+        //Load current alerts on startup (like "Refresh")
+        //loadInfo();
+
+    }
+    
+    /**
+     * Loads the references for each UI Element of the application
+     */
+    private void getUIElements() {
+		
+    	/* Buttons */
+    	parseButton = (Button)findViewById(R.id.MAparseButton);
+    	//Set parse button action
+    	parseButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
@@ -107,8 +119,9 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			}
 		});
         
-        //Set prefs button action
+        
         prefButton = (Button)findViewById(R.id.MAsetPreference);
+        //Set prefs button action
         prefButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -117,18 +130,21 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 				setDefaultPreferences();
 			}
 		});
-    }
-    
-    /**
-     * Loads the references for each UI Element of the application
-     */
-    private void getUIElements() {
-		
-    	//Connection info text views
-    	mConnectionState = (TextView) findViewById(R.id.MAconnectionState);
-    	mConnectionStatus = (TextView) findViewById(R.id.MAconnectionStatus);
-    	mLatLong = (TextView) findViewById(R.id.MALatLong);
+        /* END Buttons */ 
+    	
+    	//Spinning progress bar
+    	mProgressBar = (ProgressBar) findViewById(R.id.MAinitialLoading);
+    	
+    	/* Xml date */
+    	mLastUpdate = (TextView) findViewById(R.id.MAxmlDate);
+    	//Set initial text
+    	mLastUpdate.setText(getString(R.string.UIE_xml_date));
+    	/* END Xml date */
+    	
+    	//Province    	
     	mAddress = (TextView) findViewById(R.id.MAaddress);
+    	//Set initial text
+    	mAddress.setText(getString(R.string.LCI_address_output_string));
 	}
 
 	/**
@@ -203,11 +219,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 					//Log the result
 					Log.d(Constants.APP_TAG, getString(R.string.GPC_resolved));
 						
-					//Display the result
-					mConnectionState.setText(R.string.GPC_connected);
-					mConnectionStatus.setText(R.string.GPC_resolved);
-						
-				break;
+					break;
 				
 				//If any other result was returned by Google Play Services...
 				default:
@@ -215,11 +227,10 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 					//Log the result
 					Log.d(Constants.APP_TAG, getString(R.string.GPC_no_resolution));
 					
-					//Display the result
-					mConnectionState.setText(R.string.GPC_disconnected);
-					mConnectionState.setTag(R.string.GPC_no_resolution);
+					//Display the result in Toast
+					Toast.makeText(this, getString(R.string.GPC_no_resolution), Toast.LENGTH_SHORT).show();
 				
-				break;
+					break;
 			}
 				
 			//If any other request code was received
@@ -274,12 +285,19 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	
     	String prefCon = null;				//Network connection preferred by user
     	
+    	//Show we are in
+    	Log.d(Constants.APP_TAG_ERROR, "SHOW");
+    	
+    	//Show progress bar
+    	mProgressBar.setVisibility(LinearLayout.VISIBLE);
+    	
     	//Show current city
     	getAddress();
     	
     	//Get network connection preferred
     	prefCon = sPref.getString(Constants.PREF_PREFERRED_CONNECTION, Constants.ANY);
     	
+    	//TODO: CONDITIONAL OPTIONS
     	if(prefCon.equals(Constants.ANY) && (wifiConnected || mobileConnected)) {
     		downloadXmlHandler = new DownloadXmlTask().execute(Constants.URL);
     	}
@@ -328,10 +346,10 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	public void onLocationChanged(Location location) {
 
 		//Report to the UI that the location was updated
-		mConnectionStatus.setText(R.string.LCI_location_updated);
+		Toast.makeText(this, R.string.LCI_location_updated, Toast.LENGTH_SHORT).show();
 		
 		//Show the new location
-		mLatLong.setText(LocationUtils.getLatLng(this, location));
+		//TODO: CALL TO REFRESH DATA AND UI
 	}
 
 	/**
@@ -341,7 +359,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	@Override
 	public void onConnected(Bundle connectionHint) {
 		//Display the connection status
-		mConnectionStatus.setText(R.string.GPC_connected);
+		//TODO: START PERIODIC UPDATES??
 	}
 
 	/**
@@ -351,7 +369,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	@Override
 	public void onDisconnected() {
 		//Display the connection status
-		mConnectionStatus.setText(R.string.GPC_disconnected);
+		Toast.makeText(this, getString(R.string.LCI_location_disconnected), Toast.LENGTH_SHORT).show();
+		//TODO: REFRESH DATA / RETRY CONNECTION ???
 	}
 	
 	/**
@@ -418,7 +437,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     		
     		//Get the current location
     		loc = mLocationClient.getLastLocation();
-    		mLatLong.setText(LocationUtils.getLatLng(this, loc));
     		
     		//Start the background task to retrieve the current city
     		getAddressHandler = (new MainActivity.GetAddressTask(this)).execute(loc);
@@ -456,6 +474,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
      */
     private class DownloadXmlTask extends AsyncTask<String, Void, String> {
 
+    	private String lastUpdate = "";				//Publication Date info for current province
+    	
     	@Override
     	protected String doInBackground(String... urls) {
     		
@@ -474,9 +494,17 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	@Override
     	protected void onPostExecute(String result){
             setContentView(R.layout.activity_main);
+            
             // Displays the HTML string in the UI via a WebView
             WebView myWebView = (WebView) findViewById(R.id.MAmainWebView);
             myWebView.loadData(result, "text/html", null);
+            
+            //Show publication date
+            mLastUpdate.setText(lastUpdate);
+            
+            //Hide Progress Bar
+            mProgressBar.setVisibility(LinearLayout.INVISIBLE);
+                        
     	}
 
     	/**
@@ -533,44 +561,69 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     		
     		//If we got the current province without errors
     		if (currentProvince != null){
-    			fadacbadfas
+        		/* Parser returns a List (called "items") of Item objects.
+        	    * Each Item object represents a alarm for a place in the XML feed.
+        	    * This section processes selects the item for current province
+        	    */
+        	    for (Item item : items) {
+        	    	//We are only interested in current province
+        	    	if(item.getTitle().equals(currentProvince)){
+        	    		//Get province alert info
+        	    		htmlString.append("<p>");
+        	    		htmlString.append(item.getTitle() + "</p>");
+        	    		
+        	    		//Get publication date and show it in last update 
+        	    		lastUpdate = item.getPubDate();
+        	    	}
+        	    }
+    		}
+    		//...if there was some errors retrieving current location, show an error in html view
+    		else{
+    			htmlString.append("<p>Unknown location</p>");
     		}
 	    	   		
-    		// Parser returns a List (called "items") of Item objects.
-    	    // Each Item object represents a alarm for a place in the XML feed.
-    	    // This section processes selects the item for current province
-    	    for (Item item : items) { 
-    	        htmlString.append("<p>");
-    	        htmlString.append(item.getTitle() + "</p>");
-    	    }
     	    return htmlString.toString();
     	}
     	
     	/**
     	 * This methods waits for getAddressTask to be completed if it is necessary and after that returns the current
     	 * province from the result of the task
+    	 * It waits a maximum of 5 cycles of 1 second each one
     	 * 
     	 * @return null it there was an error with getAddressTask or the name of the current province based on current location
     	 */
     	private String getCurrentProvince(){
+    		
+    		int cycle = -1;					//Number of cycles to be waiting the current location
+    		String result = null;
+    		
+    		//Set max number of cycles
+    		cycle = Constants.LOC_MAX_CYCLES_WAIT;
+    		
     		//Checks if getAddressTask is finished
-	    	if(getAddressHandler.getStatus() == AsyncTask.Status.RUNNING){
-	    		//If it is running, wait for 0,1 seconds
+    		while ((cycle > 0) && (getAddressHandler.getStatus() == AsyncTask.Status.RUNNING)){
 	    		try {
-					Thread.sleep(100);
+	    			//If it is running, wait for 1 seconds
+					Thread.sleep(Constants.LOC_CYCLE_TIME_MILLIS);
+					cycle--;
 				} catch (InterruptedException e) {
 					//Register log and print stacktrace
 					Log.e(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_interrupted_exception));
 					e.printStackTrace();
 				}
-	    	}
-    		//If the getAddressTask finished...
-	    	else{
-	    		//We get current province
-
-	    		
-	    		//If it's not null
-	    	}
+    		}    		
+    		
+    		//If task is still running
+    		if((getAddressHandler.getStatus() == AsyncTask.Status.RUNNING)){
+    			//TODO: que hacer cuando no hay manera de sacar la localización.....
+    		}
+    		//If we already have current location it is stored in mAddress text view
+    		else{
+    			result = mAddress.getText().toString();
+    		}
+    		
+    		return result;
+	    	
     	}
     	
     	/**
@@ -747,6 +800,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 			//Set the address in the UI
 			mAddress.setText(result);
+			
 		}	
 		
 	}
