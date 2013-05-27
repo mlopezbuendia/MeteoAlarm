@@ -75,8 +75,9 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     
     //UI Handlers
     private ProgressBar mProgressBar;
-    TextView mLastUpdate;
-    TextView mAddress;
+    private TextView mLastUpdate;
+    private TextView mAddress;
+    private WebView myWebView;    
     private Button parseButton = null;
     private Button prefButton = null;
 	
@@ -145,6 +146,9 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	mAddress = (TextView) findViewById(R.id.MAaddress);
     	//Set initial text
     	mAddress.setText(getString(R.string.LCI_address_output_string));
+    	
+    	//WebView with alarms info
+    	myWebView = (WebView) findViewById(R.id.MAmainWebView);
 	}
 
 	/**
@@ -299,10 +303,10 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	
     	//TODO: CONDITIONAL OPTIONS
     	if(prefCon.equals(Constants.ANY) && (wifiConnected || mobileConnected)) {
-    		downloadXmlHandler = new DownloadXmlTask().execute(Constants.URL);
+    		downloadXmlHandler = (new DownloadXmlTask(this)).execute(Constants.URL);
     	}
     	else if(prefCon.equals(Constants.WIFI) && (wifiConnected)){
-    		downloadXmlHandler = new DownloadXmlTask().execute(Constants.URL);
+    		downloadXmlHandler = (new DownloadXmlTask(this)).execute(Constants.URL);
     	}
     	else{ 
     		Log.d(Constants.APP_TAG_ERROR, getString(R.string.EEG_Xml_Not_Downloaded));
@@ -443,7 +447,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	}
 		
 	}
-
+	
 	@Override
 	public void onProviderDisabled(String arg0) {
 		// TODO Auto-generated method stub
@@ -472,9 +476,23 @@ public class MainActivity extends FragmentActivity implements LocationListener,
      * Class to implement the async download
      * 
      */
-    private class DownloadXmlTask extends AsyncTask<String, Void, String> {
+    protected class DownloadXmlTask extends AsyncTask<String, Void, String> {
 
     	private String lastUpdate = "";				//Publication Date info for current province
+    	Context localContext = null;							//Stores the context when the Activity instantiates it
+    	
+    	/**
+    	 * Constructor
+    	 * 
+    	 * @param context
+    	 */
+    	public DownloadXmlTask(Context context){
+    		//Required by the semantics of AsyncTask
+			super();
+			
+			//Set a context for the background task
+			localContext = context;
+    	}
     	
     	@Override
     	protected String doInBackground(String... urls) {
@@ -493,10 +511,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
     	@Override
     	protected void onPostExecute(String result){
-            setContentView(R.layout.activity_main);
             
             // Displays the HTML string in the UI via a WebView
-            WebView myWebView = (WebView) findViewById(R.id.MAmainWebView);
             myWebView.loadData(result, "text/html", null);
             
             //Show publication date
@@ -504,7 +520,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
             
             //Hide Progress Bar
             mProgressBar.setVisibility(LinearLayout.INVISIBLE);
-                        
+                   
     	}
 
     	/**
@@ -558,7 +574,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     		
     		//Get current province from getAddressTask
     		currentProvince = getCurrentProvince();
-    		
+   		
     		//If we got the current province without errors
     		if (currentProvince != null){
         		/* Parser returns a List (called "items") of Item objects.
@@ -619,7 +635,9 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     		}
     		//If we already have current location it is stored in mAddress text view
     		else{
+
     			result = mAddress.getText().toString();
+
     		}
     		
     		return result;
@@ -705,6 +723,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		
 		/**
 		 * Constructor called by the system to instantiate the task 
+		 * 
+		 * @param context
 		 */
 		public GetAddressTask(Context context) {
 			
