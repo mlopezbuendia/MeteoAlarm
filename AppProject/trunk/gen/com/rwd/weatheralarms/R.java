@@ -202,6 +202,12 @@ containing a value of this type.
         public static final int main=0x7f090000;
     }
     public static final class string {
+        /**  END Location Info 
+ Alarm Info 
+         */
+        public static final int ALI_alarm_today=0x7f060031;
+        public static final int ALI_alarm_tomorrow=0x7f060032;
+        public static final int ALI_no_alarm=0x7f060033;
         public static final int EEG_IO_Exception=0x7f06001e;
         public static final int EEG_Xml_Not_Downloaded=0x7f060020;
         public static final int EEG_Xml_Parser_Exception=0x7f06001f;

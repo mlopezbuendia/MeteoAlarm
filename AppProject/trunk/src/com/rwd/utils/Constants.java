@@ -39,8 +39,9 @@ public final class Constants {
 	public static final int today = 0;
 	public static final int tomorrow = 1;
 	
-	//Start of alarm info in cData
-	public static final String startInfo = "awt;";
+	//Constants for manipulate alarm info in cData
+	public static final String daySplit = "Tomorrow";
+	public static final String startInfo = "awt:";
 	public static final String startLevel = "level:";
 	
 	//URL where we extract the info from

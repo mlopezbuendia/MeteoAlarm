@@ -44,8 +44,8 @@
         android:id="@+id/MAmainWebView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="0.79"
         android:layout_marginLeft="23dp"
-        android:layout_marginTop="100dp"
-        android:layout_weight="0.79" />
+        android:layout_marginTop="100dp" />
 
 </LinearLayout>

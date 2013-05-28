@@ -15,6 +15,7 @@ import java.util.List;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.util.SparseIntArray;
 import android.util.Xml;
 
 public class Parser {
@@ -151,10 +152,23 @@ public class Parser {
 	private String readInfo(XmlPullParser parser, String tag) throws XmlPullParserException, IOException{
 		
 		String result = null;
+		int indexStr = -1;				//Used in string publication date formatting
 		
 		parser.require(XmlPullParser.START_TAG, Constants.ns, tag);
 		result = readText(parser);
 		parser.require(XmlPullParser.END_TAG, Constants.ns, tag);
+		
+		//If tag is pubDate, we need to format it in an friendly way
+		if(tag.equals(Constants.pubDate)){
+			//We drop content until comma and the following blank space
+			indexStr = result.indexOf(",");
+			result = result.substring(indexStr+1);
+			
+			//Drop seconds after second colon
+			indexStr = result.indexOf(":", result.indexOf(":") + 1);
+			result = result.substring(0, indexStr);
+		}
+		
 		return result;
 		
 	}
@@ -170,9 +184,9 @@ public class Parser {
 	private DetailedInfo readDescription(XmlPullParser parser) throws XmlPullParserException, IOException{
 		
 		DetailedInfo result = null;
-		Alarm today = null;					//Today's alarm info
-		Alarm tomorrow = null;				//Tomorrow's alarm info
-		String cData = null;				//Detailed info text raw
+		SparseIntArray today = null;				//Today's alarms
+		SparseIntArray tomorrow = null;				//Tomorrow's alarms
+		String cData = null;						//Detailed alarm info text raw
 				
 		//Position check
 		parser.require(XmlPullParser.START_TAG, Constants.ns, Constants.description);
@@ -231,61 +245,74 @@ public class Parser {
 	 * 
 	 * @param cData input with today and tomorrow's alarms
 	 * @param day to extract (0 = today, 1 =  tomorrow)
-	 * @return Alarm with info from cData
+	 * @return Alarms Map with info from cData. The structure is a SparseIntArray that is equivalent to a Map<Integer, Integer>
+	 * with a better performance
 	 */
-	private Alarm extractAlarm(String cData, int day){
+	private SparseIntArray extractAlarm(String cData, int day){
 		
-		Alarm result = null;
-		int index = -1;				//Index where starts alarm info
-		String alarmInfo = null;	//Substring starting from alarm info
-		int type = -1;			//Alarm type
-		int level = -1;			//Alarm level
+		SparseIntArray result = null;
+		int index = -1;						//Index where starts alarm info
+		String alarmInfo = null;			//Substring starting from alarm info
+		int type = -1;						//Alarm type
+		int level = -1;						//Alarm level
+		String todayInfo = null;			//To contain string info from the beginning to the string "Tomorrow"
+		String tomorrowInfo = null;			//To contain string info from the string "Tomorrow" till the end
 		
-		//Looks for start of alarm info
-		index = cData.indexOf(Constants.startInfo);
+		//Split the cData string into today and tomorrow
+		index = cData.indexOf(Constants.daySplit);
+		todayInfo = cData.substring(0, index);
+		tomorrowInfo = cData.substring(index);
 		
-		//If was found...
-		if(index != -1){
-			//We get the substring with the info
-			alarmInfo = cData.substring(index);
-			
-			//If day = tomorrow we want the second info, so we look for start alarm info again
-			if (day == Constants.tomorrow){
-				index = alarmInfo.indexOf(Constants.startInfo);
-				
-				//If was found...
-				if(index != -1){
-					//We get the substring with tomorrow's alarm info
-					alarmInfo = alarmInfo.substring(index);
-				}
-				else{
-					alarmInfo = "";
-				}
+		//Select the day we are interested in
+		switch(day){
+			case Constants.today:
+			{
+				alarmInfo = todayInfo;
+				break;
+			}
+			case Constants.tomorrow:
+			{
+				alarmInfo = tomorrowInfo;
+				break;
 			}
 		}
-		else{
-			alarmInfo = "";
-		}
 		
-		//Now we have in alarmInfo the info for the desired day or "" if something went wrong
-		if(!alarmInfo.equals("")){
+		//Create a new SparseIntArray object
+		result = new SparseIntArray();
+		
+		//Looks for the beginning of alarm info
+		index = alarmInfo.indexOf(Constants.startInfo);
+		
+		//Iterate through the string looking for alarm info
+		while(index != -1){
+			
+			//Now we have in alarmInfo the info for the desired day
+			alarmInfo = alarmInfo.substring(index);
+			
 			//Populate Alarm from alarm info string starting with "awt:"
 			//...get the awt type code, it can be one or 2 digits, so we get 2 characters. If it's one digit long, we dismiss the 
-			//blank space after that digit...
+			//blank space after that digit..
 			type = Integer.parseInt(alarmInfo.substring(4, 6).trim());
+			
 			//...go on looking for "level:"
 			index = alarmInfo.indexOf(Constants.startLevel);
+			
 			//If was found...
 			if(index != -1){
 				//Follow to level...
 				alarmInfo = alarmInfo.substring(index);
 				//level is always 1 digit long (1,2,3,4)
-				level = Integer.parseInt(alarmInfo.substring(0,1));
+				level = Integer.parseInt(alarmInfo.substring(6, 7));
 			}
 			
-			result = new Alarm(type, level);
+			//Add the new alarm for the processed day
+			result.put(type, level);
+			
+			//Advance to the next alarm of the current day
+			index = alarmInfo.indexOf(Constants.startInfo);
 		}
-		
+
+		//Return the result;		
 		return result;		
 	}
 	
@@ -309,5 +336,5 @@ public class Parser {
 		return result;
 		
 	}
-	
+		
 }

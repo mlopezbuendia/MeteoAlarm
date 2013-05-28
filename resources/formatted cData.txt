@@ -1,0 +1,55 @@
+<table border="0" cellspacing="0" cellpadding="3">
+	<tr>
+		<th colspan="3" align="left">
+			Today
+		</th>
+	</tr>
+	<tr>
+		<td width="28">
+			<img border="1" src="http://www.meteoalarm.eu/documents/rss/wflag-l2-t10.jpg" alt="awt:10 level:2">
+		</td>
+		<td>
+			<b>
+				From: 
+			</b>
+			<i>
+				28.05.2013 12:00 CET
+			</i>
+			<b> 
+				Until: </b>
+			<i>
+				28.05.2013 20:00 CET
+			</i>
+		</td>
+	</tr>
+	<tr>
+		<td width="28"></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td width="28">
+			<img border="1" src="http://www.meteoalarm.eu/documents/rss/wflag-l2-t3.jpg" alt="awt:3 level:2">
+		</td>
+		<td><b>From: </b><i>28.05.2013 12:00 CET</i><b> Until: </b><i>28.05.2013 20:00 CET</i></td>
+	</tr>
+	<tr>
+		<td width="28">
+		</td>
+		<td>
+		</td>
+	</tr>
+	<tr>
+		<th colspan="3" align="left">
+			<br />
+			Tomorrow
+		</th>
+	</tr>
+	<tr>
+		<td width="28"><img border="1" src="http://www.meteoalarm.eu/documents/rss/wflag-l2-t1.jpg" alt="awt:1 level:2"></td>
+		<td><b>From: </b><i>29.05.2013 09:00 CET</i><b> Until: </b><i>29.05.2013 20:00 CET</i></td>
+	</tr>
+	<tr>
+		<td width="28"></td>
+		<td></td>
+	</tr>
+</table>

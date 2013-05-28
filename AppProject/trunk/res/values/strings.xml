@@ -33,12 +33,18 @@
 	<!-- END Google Play Connection Info -->
 	
 	<!-- Location Info -->
-	<string name="LCI_address_output_string">Address in text: </string>
+	<string name="LCI_address_output_string">Current province: </string>
 	<string name="LCI_latitude_longitude">Latitude + Longitude: </string>
 	<string name="LCI_location_updated">Location was updated by the system</string>
 	<string name="LCI_no_address_found">No Address was found</string>
 	<string name="LCI_no_geocoder_available">No Geocoder available for retrieving current city</string>
-	<string name="LCI_location_disconnected">Location Service Disconnected. Reconnecting...</string>
+	<string name="LCI_location_disconnected">Location Service Disconnected. Reconnecting..</string>
 	<!-- END Location Info -->
+	
+	<!-- Alarm Info -->
+	<string name="ALI_alarm_today">Today: </string>
+	<string name="ALI_alarm_tomorrow">Tomorrow: </string>
+	<string name="ALI_no_alarm">No alarms for this day</string>
+	<!-- END Alarm Info -->
     
 </resources>

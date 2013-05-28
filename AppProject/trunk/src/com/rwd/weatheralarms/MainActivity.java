@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -29,6 +26,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -138,14 +136,10 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	
     	/* Xml date */
     	mLastUpdate = (TextView) findViewById(R.id.MAxmlDate);
-    	//Set initial text
-    	mLastUpdate.setText(getString(R.string.UIE_xml_date));
     	/* END Xml date */
     	
     	//Province    	
     	mAddress = (TextView) findViewById(R.id.MAaddress);
-    	//Set initial text
-    	mAddress.setText(getString(R.string.LCI_address_output_string));
     	
     	//WebView with alarms info
     	myWebView = (WebView) findViewById(R.id.MAmainWebView);
@@ -537,15 +531,10 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     		Parser parser = null;						//Parser
     		List<Item> items = null;					//All alarm items
     		StringBuilder htmlString = null;			//Html with xml content
-    		DateFormat formatter = null;				//Formatter for current date
-    		Calendar rightNow = null;					//Current Date
     		
     		//Construct html output
     		htmlString = new StringBuilder();
     		htmlString.append("<h3>" + getResources().getString(R.string.UIE_page_title) + "</h3>");
-    		formatter = new SimpleDateFormat(Constants.FORMATTER, new Locale(Constants.LOCALE_LANGUAGE, Constants.LOCALE_COUNTRY));
-    		rightNow = Calendar.getInstance();
-    		htmlString.append("<em>" + getResources().getString(R.string.UIE_updated) + formatter.format(rightNow.getTime()) + "</em>");
     		
     		//Get stream from url
     		stream = downloadUrl(url);
@@ -584,10 +573,34 @@ public class MainActivity extends FragmentActivity implements LocationListener,
         	    for (Item item : items) {
         	    	//We are only interested in current province
         	    	if(item.getTitle().equals(currentProvince)){
-        	    		//Get province alert info
+        	    		//Get province title
         	    		htmlString.append("<p>");
         	    		htmlString.append(item.getTitle() + "</p>");
         	    		
+        	    		//Inform we are going to show today's info
+        	    		htmlString.append("<p>" + getString(R.string.ALI_alarm_today) + "</p>");
+        	    		
+        	    		//If there are not alarms for today, show a message
+        	    		if(item.getDescription().noAlarms(Constants.today)){
+        	    			htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
+        	    		}
+        	    		//...if there are alarms, get the formatted info
+        	    		else{
+            	    		htmlString.append(formatAlarms(item.getDescription().getToday()));
+        	    		}
+
+        	    		//Inform we are going to show tomorrow's info
+        	    		htmlString.append("<p>" + getString(R.string.ALI_alarm_tomorrow) + "</p>");
+        	    		
+        	    		//If there are not alarms for tomorrow, show a message
+        	    		if(item.getDescription().noAlarms(Constants.tomorrow)){
+        	    			htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
+        	    		}
+        	    		//...if there are alarms, get the formatted info
+        	    		else{
+            	    		htmlString.append(formatAlarms(item.getDescription().getTomorrow()));
+        	    		}
+       	    		
         	    		//Get publication date and show it in last update 
         	    		lastUpdate = item.getPubDate();
         	    	}
@@ -662,6 +675,41 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	    // Starts the query
     	    conn.connect();
     	    return conn.getInputStream();
+    		
+    	}
+    	
+    	/**
+    	 * Format alarm info in an attractive way to show in UI
+    	 * 
+    	 * @param alarm map with all alarms for a day
+    	 * @return string formatted
+    	 */
+    	private String formatAlarms(SparseIntArray alarms){
+    		
+    		String result = null;
+    		int alarmLevel = -1;			 		//Alarm level used in processing info
+    		int alarmType = -1;						//Alarm type used in processing info
+    
+    		result = new String();
+    		
+    		//Iterate over all alarm elements
+    		for (int i=0; i < alarms.size(); i++){
+    			
+    			//Extract the current alarm info
+    			alarmLevel = alarms.valueAt(i);
+    			alarmType = alarms.keyAt(i);
+    			
+    			//Build the info
+      			result = result +"<p>" 
+							+ "Type: " 
+							+ alarmType 
+							+ " Level: "
+							+ alarmLevel
+							+ "</p>";    			
+    			
+    		}
+    		
+    		return result;
     		
     	}
 
