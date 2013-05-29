@@ -39,10 +39,12 @@ public final class Constants {
 	public static final int today = 0;
 	public static final int tomorrow = 1;
 	
-	//Constants for manipulate alarm info in cData
+	//Constants for manipulate alarm info in cData and publication date
 	public static final String daySplit = "Tomorrow";
 	public static final String startInfo = "awt:";
 	public static final String startLevel = "level:";
+	public static final String startPubDate = "<pubDate>";
+	public static final String endPubDate = "</pubDate>";
 	
 	//URL where we extract the info from
 	public static final String URL = "http://www.meteoalarm.eu/documents/rss/es.rss";
@@ -59,6 +61,10 @@ public final class Constants {
 	public static final String PREF_PREFERRED_CONNECTION = "ConnectionPreferred";
 	public static final String AWARENESS_PREFERENCES = "AwarenessPrefs";
 	public static final String LEVELS_PREFERENCES = "LevelsPrefs";
+	
+	//Preferences Elements
+	public static final String BBDD_DATE = "DatabaseDate";
+	public static final String DEFAULT_BBDD_DATE = "Mon, 00 Jan 0000 00:00:00 +0000";
 	
 	//Date format
 	public static final String FORMATTER = "dd MMM h:mmaa";

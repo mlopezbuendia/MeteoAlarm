@@ -20,8 +20,8 @@ import android.util.Xml;
 
 public class Parser {
 	
-	//Parser
-	public List<Item> parse(InputStream in) throws XmlPullParserException, IOException{
+	//Parser stores info in BBDD
+	public void parse(InputStream in) throws XmlPullParserException, IOException{
 		
 		try{
 			//Defining the parser
@@ -30,7 +30,7 @@ public class Parser {
 			parser.setInput(in, null);
 			parser.nextTag();
 			//Calling to process
-			return readFeed(parser);
+			readFeed(parser);
 		} 
 		finally{
 			in.close();
@@ -39,10 +39,7 @@ public class Parser {
 	}
 	
 	//Processing the feed
-	private List<Item> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException{
-		
-		//Result
-		List<Item> items = new ArrayList<Item>();
+	private void readFeed(XmlPullParser parser) throws XmlPullParserException, IOException{
 		
 		//Name of current tag
 		String currentTag = null;
@@ -61,7 +58,7 @@ public class Parser {
 			
 			//Looking for "item" tag
 			if(currentTag.equals(Constants.lookedTag)){
-				items.add(readItem(parser));
+				readItem(parser);
 			}
 			//If we receive channel tag, skip only this line
 			else if(currentTag.equals(Constants.channelTag)){
@@ -72,19 +69,16 @@ public class Parser {
 			}
 		}
 		
-		return items;
-		
 	}
 	
 	/**
-	 * Reads the content of an item and populates one instance
+	 * Reads the content of an item and populates one instance. After that insert that instance into bbdd
 	 * 
 	 * @param parser doc
-	 * @return one item with alarms info for a location
 	 * @throws IOException 
 	 * @throws XmlPullParserException 
 	 */
-	private Item readItem(XmlPullParser parser) throws XmlPullParserException, IOException{
+	private void readItem(XmlPullParser parser) throws XmlPullParserException, IOException{
 		
 		Item result = null;
 		String currentTag = null;			//Name of current tag
@@ -136,7 +130,8 @@ public class Parser {
 		//Building new Item instance
 		result = new Item(title, link, description, pubDate, guid);
 		
-		return result;
+		//Store Item instance
+		insertItem(result);
 		
 	}
 	

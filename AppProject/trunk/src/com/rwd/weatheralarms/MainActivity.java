@@ -1,7 +1,9 @@
 package com.rwd.weatheralarms;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -44,9 +46,8 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationRequest;
 import com.rwd.utils.AwarenessModel;
-import com.rwd.utils.LevelsModel;
 import com.rwd.utils.Constants;
-import com.rwd.utils.Item;
+import com.rwd.utils.LevelsModel;
 import com.rwd.utils.LocationUtils;
 import com.rwd.utils.Parser;
 
@@ -587,37 +588,154 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			localContext = context;
     	}
     	
+    	/**
+    	 * Check if new version file is available to determine if current database content is valid
+    	 * 
+    	 * @return Date of the last xml file version
+    	 */
     	@Override
     	protected String doInBackground(String... urls) {
     		
-    		//Try to get the Xml formatted from web
-    		try {
-				return loadXmlFromNetwork(urls[0]);
-			//If it doesn't succeed, it shows errors
-    		}catch (XmlPullParserException e) {
+    		//Check if new version file is available
+    		if(onlineIsNewer(urls[0])){
+    		
+    			//Try to get the Xml formatted from web
+    			try {
+    				return loadXmlFromNetwork(urls[0]);
+    			//If it doesn't succeed, it shows errors
+    			}catch (XmlPullParserException e) {
 	                return getResources().getString(R.string.EEG_xml_error);
-    		} catch (IOException e) {
-                return getResources().getString(R.string.EEG_connection_error);
-            } 
+    			} catch (IOException e) {
+    				return getResources().getString(R.string.EEG_connection_error);
+    			}
+    		}
+    		//...if there is no new version, current database content is valid
+    		else{
+    			return getDateBBDD();
+    		}
     		
     	}
 
-    	@Override
+    	/**
+    	 * Check if the date of the xml stored into shared preferences is the same as the 
+    	 * 
+    	 * @param url to retrieve xml
+    	 * @return true if the online xml version is newer than the stored in bbdd
+    	 */
+    	private boolean onlineIsNewer(String url) {
+			
+    		boolean result = false;
+    		String dateBBDD = null;				//Date of bbdd info
+    		String dateOnline = null;			//Date of online info
+    		
+    		//Get xml date stored into bbdd
+    		dateBBDD = getDateBBDD();
+    		
+    		//Get xml date from the Internet
+    		dateOnline = getDateOnline(url);
+    		
+    		//If dates are different, there is a new online version
+    		if((dateBBDD != null) && (dateOnline != null)){
+				if(!dateBBDD.equals(dateOnline)){
+					result = true;
+				}
+    		}
+			
+			return result;
+    		
+		}
+
+    	/**
+    	 * Get the date of the current online xml version file
+    	 * 
+    	 * @param url to retrieve xml
+    	 * @return date from xml file
+    	 */
+    	private String getDateOnline(String url) {
+
+    		String result = null;
+    		InputStream stream = null;					//Represent the xml content
+    		BufferedReader reader = null;				//Used for searching string into stream
+    		boolean dateFound = false;					//Check if we found publication date into xml file
+    		String line = null;							//Line returned by reader
+    		int indexStartDate = -1;					//Used for searching publication date into a line 
+    		int indexEndDate = -1;						//Used for extract pubDate
+    		
+    		try {
+    			
+    			//Get stream from url
+				stream = downloadUrl(url);
+				
+				//Initialize reader from inputstream from stream
+				reader = new BufferedReader(new InputStreamReader(stream));
+				
+				//Look for date into reader until the end of file or date was found
+				while(!dateFound && reader.ready()){
+					//Read line-by-line
+					line = reader.readLine();
+					
+					//Check if line contains publication date
+					indexStartDate = line.indexOf(Constants.startPubDate);
+					
+					//If was found, exit while...
+					if (indexStartDate != -1){
+						dateFound = true;
+					}
+				}
+				
+				//If we are here because we found date...
+				if (indexStartDate != -1){
+					//Extract only date between start and ending
+					indexEndDate = line.indexOf(Constants.endPubDate);
+					
+					result = line.substring(indexStartDate, indexEndDate);
+				}
+				
+			} catch (IOException e) {
+				Log.d(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_IO_Exception));
+				e.printStackTrace();
+			}
+    		
+			return result;
+		}
+
+		/**
+    	 * Get the date of the stored information. This date is stored in General Shared Preferences
+    	 * 
+    	 * @return date from shared preferences
+    	 */
+		private String getDateBBDD() {
+			
+			String result = null;
+
+			result = sPref.getString(Constants.BBDD_DATE, Constants.DEFAULT_BBDD_DATE);
+			
+			return result;
+		}
+
+		@Override
     	protected void onPostExecute(String result){
             
-            // Displays the HTML string in the UI via a WebView
-            myWebView.loadData(result, "text/html", null);
+    		//Wait until get current province
+    		currentProvince = getCurrentProvince();
+    		
+    		//Update UI Elements. result contains last version xml file date
+    		updateUIElements(result);
+    		
+    		//TODO: remove from here and paste in the other place (updateUI)
+    		// Displays the HTML string in the UI via a WebView
+            //myWebView.loadData(result, "text/html", null);
             
             //Show publication date
-            mLastUpdate.setText(lastUpdate);
+            //mLastUpdate.setText(lastUpdate);
             
             //Hide Progress Bar
-            mProgressBar.setVisibility(LinearLayout.INVISIBLE);
+            //mProgressBar.setVisibility(LinearLayout.INVISIBLE);
                    
     	}
 
     	/**
-    	 * Download XML and populate a list with alarm items
+    	 * Download XML and populate a list with alarm items. Inside the parser, it also loads data into bbdd
     	 * 
     	 * @param url where to download xml
     	 * @return
@@ -627,33 +745,93 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	private String loadXmlFromNetwork(String url) throws IOException, XmlPullParserException{
     		
     		InputStream stream = null;					//Represent the xml content to parse
-    		Parser parser = null;						//Parser
-    		List<Item> items = null;					//All alarm items
-    		StringBuilder htmlString = null;			//Html with xml content
+    		//List<Item> items = null;					//All alarm items
+    		//StringBuilder htmlString = null;			//Html with xml content
     		
+    		//TODO: Copy it into refreshUI
     		//Construct html output
-    		htmlString = new StringBuilder();
-    		htmlString.append("<h3>" + getResources().getString(R.string.UIE_page_title) + "</h3>");
+    		//htmlString = new StringBuilder();
+    		//htmlString.append("<h3>" + getResources().getString(R.string.UIE_page_title) + "</h3>");
     		
     		//Get stream from url
     		stream = downloadUrl(url);
     		    
-    		//Check if the online file is newer than the last one we downloaded
-    		//If there is a new file version, load data from url...
-//    		if(onlineIsNewer()){
-//    			
+    		//Get items from stream and at the same time, store it into bbdd
+    		getItemsFromStream(stream);
+    		
+    		//Return the new date after update database info
+    		return getDateBBDD();
+
+    		//Load items from bbdd
+    		//items = getItemsFromBBDD();
+//    		
+//  		
+//    		//If we got the current province and items without errors
+//    		if ((currentProvince != null) && (items != null)){
+//        		/* 
+//        	    * Each Item object represents a alarm for a place in the XML feed.
+//        	    * This section processes selects the item for current province
+//        	    */
+//        	    for (Item item : items) {
+//        	    	//We are only interested in current province
+//        	    	if(item.getTitle().equals(currentProvince)){
+//        	    		//Get province title
+//        	    		htmlString.append("<p>");
+//        	    		htmlString.append(item.getTitle() + "</p>");
+//        	    		
+//        	    		//Inform we are going to show today's info
+//        	    		htmlString.append("<p>" + getString(R.string.ALI_alarm_today) + "</p>");
+//        	    		
+//        	    		//If there are not alarms for today, show a message
+//        	    		if(item.getDescription().noAlarms(Constants.today)){
+//        	    			htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
+//        	    		}
+//        	    		//...if there are alarms, get the formatted info
+//        	    		else{
+//            	    		htmlString.append(formatAlarms(item.getDescription().getToday()));
+//        	    		}
+//
+//        	    		//Inform we are going to show tomorrow's info
+//        	    		htmlString.append("<p>" + getString(R.string.ALI_alarm_tomorrow) + "</p>");
+//        	    		
+//        	    		//If there are not alarms for tomorrow, show a message
+//        	    		if(item.getDescription().noAlarms(Constants.tomorrow)){
+//        	    			htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
+//        	    		}
+//        	    		//...if there are alarms, get the formatted info
+//        	    		else{
+//            	    		htmlString.append(formatAlarms(item.getDescription().getTomorrow()));
+//        	    		}
+//       	    		
+//        	    		//Get publication date and show it in last update 
+//        	    		lastUpdate = item.getPubDate();
+//        	    	}
+//        	    }
 //    		}
-//    		//If we have the same version, load data from bbdd...
+//    		//...if there was some errors retrieving current location, show an error in html view
 //    		else{
-//    			
+//    			htmlString.append("<p>Unknown location</p>");
 //    		}
+//	    	   		
+//    	    return htmlString.toString();
+    	}
+    	
+    	/**
+    	 * Parse stream and extract a list of items and store it into bbdd
+    	 * 
+    	 * @param stream to be parsed
+    	 * 
+    	 */
+    	private void getItemsFromStream(InputStream stream) {
+    		
+    		Parser parser = null;			//Parser object to analyze xml
     		
     		//Initialize parser
     		parser = new Parser();
     		
     		//Get items from stream
     		try {
-				items = parser.parse(stream);
+				parser.parse(stream);
 			} catch (XmlPullParserException e) {
 				//Nothing special
 				Log.d(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_Xml_Parser_Exception));
@@ -666,64 +844,19 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     		//Taking care: stream must be always closed
     		finally{
     			if(stream != null){
-    				stream.close();
+    				try {
+						stream.close();
+					} catch (IOException e) {
+						//Nothing special
+						Log.d(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_IO_Exception));
+						e.printStackTrace();
+					}
     			}
     		}
     		
-    		//Get current province from getAddressTask
-    		currentProvince = getCurrentProvince();
-   		
-    		//If we got the current province without errors
-    		if (currentProvince != null){
-        		/* Parser returns a List (called "items") of Item objects.
-        	    * Each Item object represents a alarm for a place in the XML feed.
-        	    * This section processes selects the item for current province
-        	    */
-        	    for (Item item : items) {
-        	    	//We are only interested in current province
-        	    	if(item.getTitle().equals(currentProvince)){
-        	    		//Get province title
-        	    		htmlString.append("<p>");
-        	    		htmlString.append(item.getTitle() + "</p>");
-        	    		
-        	    		//Inform we are going to show today's info
-        	    		htmlString.append("<p>" + getString(R.string.ALI_alarm_today) + "</p>");
-        	    		
-        	    		//If there are not alarms for today, show a message
-        	    		if(item.getDescription().noAlarms(Constants.today)){
-        	    			htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
-        	    		}
-        	    		//...if there are alarms, get the formatted info
-        	    		else{
-            	    		htmlString.append(formatAlarms(item.getDescription().getToday()));
-        	    		}
+		}
 
-        	    		//Inform we are going to show tomorrow's info
-        	    		htmlString.append("<p>" + getString(R.string.ALI_alarm_tomorrow) + "</p>");
-        	    		
-        	    		//If there are not alarms for tomorrow, show a message
-        	    		if(item.getDescription().noAlarms(Constants.tomorrow)){
-        	    			htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
-        	    		}
-        	    		//...if there are alarms, get the formatted info
-        	    		else{
-            	    		htmlString.append(formatAlarms(item.getDescription().getTomorrow()));
-        	    		}
-       	    		
-        	    		//Get publication date and show it in last update 
-        	    		lastUpdate = item.getPubDate();
-        	    	}
-        	    }
-    		}
-    		//...if there was some errors retrieving current location, show an error in html view
-    		else{
-    			htmlString.append("<p>Unknown location</p>");
-    		}
-	    	   		
-    	    return htmlString.toString();
-    	}
-    	
-    	/**
+		/**
     	 * This methods waits for getAddressTask to be completed if it is necessary and after that returns the current
     	 * province from the result of the task
     	 * It waits a maximum of 5 cycles of 1 second each one
