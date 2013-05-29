@@ -13,25 +13,25 @@
         android:id="@+id/MAxmlDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
+                
     <TextView
         android:id="@+id/MAaddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
+      
     <Button
-        android:id="@+id/MAparseButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/UIE_parse_button" />
-
-    <Button
-        android:id="@+id/MAsetPreference"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/UIE_set_pref" />
-
-    <ProgressBar
+	    android:id="@+id/MAparseButton"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="@string/UIE_parse_button" />
+	
+	<Button
+	    android:id="@+id/MAsetPreference"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="@string/UIE_set_pref" />
+	        
+	<ProgressBar
         android:id="@+id/MAinitialLoading"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="match_parent"
@@ -39,13 +39,12 @@
         android:layout_gravity="center_vertical|center_horizontal"
         android:indeterminate="true"
         android:visibility="gone" />
-
-    <WebView
+    
+   <WebView
         android:id="@+id/MAmainWebView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.79"
-        android:layout_marginLeft="23dp"
-        android:layout_marginTop="100dp" />
+        android:layout_height="match_parent"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp" />
 
 </LinearLayout>

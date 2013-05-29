@@ -10,5 +10,6 @@ http://www.sgoliver.net/blog/?p=2149
 
 <!-- uso de sqlite -->
 http://developer.android.com/reference/android/database/sqlite/package-summary.html
+http://www.vogella.com/articles/AndroidSQLite/article.html
 
 

@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -42,6 +43,8 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationRequest;
+import com.rwd.utils.AwarenessModel;
+import com.rwd.utils.LevelsModel;
 import com.rwd.utils.Constants;
 import com.rwd.utils.Item;
 import com.rwd.utils.LocationUtils;
@@ -51,9 +54,11 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 																  GooglePlayServicesClient.ConnectionCallbacks, 
 																  GooglePlayServicesClient.OnConnectionFailedListener  {
 	
-    // General Preferences && Location Specific Preferences
+    // General Preferences, Location Specific Preferences && Awareness and Levels used in alarms 
     private SharedPreferences sPref = null;
     private SharedPreferences locPref = null;
+    private SharedPreferences awarenessPref = null;
+    private SharedPreferences levelsPref = null;
     
     //Current Province or Sub-Admin Area
     private String currentProvince = null;
@@ -93,15 +98,105 @@ public class MainActivity extends FragmentActivity implements LocationListener,
         //Get initial Preferences
         sPref = getSharedPreferences(Constants.GENERAL_PREFERENCES, Context.MODE_PRIVATE);
         locPref = getSharedPreferences(LocationUtils.LOCATION_PREFERENCES, Context.MODE_PRIVATE);
+        awarenessPref = getSharedPreferences(Constants.AWARENESS_PREFERENCES, Context.MODE_PRIVATE);
+        levelsPref = getSharedPreferences(Constants.LEVELS_PREFERENCES, Context.MODE_PRIVATE);
+        
+        //Check if initial values for awarenesses and levels are set. If not, set them
+        if(!awarenessesAreSet()){
+        	setDefaultAwarenesses();
+        }
+        
+        if(!levelsAreSet()){
+        	setDefaultLevels();
+        }
         
         mobileConnected = true;
         
+        //TODO: ???
         //Load current alerts on startup (like "Refresh")
         //loadInfo();
 
     }
     
     /**
+     * Store default alarm levels into Shared Preferences
+     */
+    private void setDefaultLevels() {
+    	
+    	Editor editor = null;				//Levels SharedPreferences editor
+    	
+    	//Get the shared preferences editor
+    	editor = levelsPref.edit();
+    	
+    	//Load all levels values from array defined in LevelsModel class
+    	for (int i = 1; i <= LevelsModel.NUM_LEVELS; i++){
+    		editor.putString(String.valueOf(i), LevelsModel.allLevels[i-1]);
+    	}
+    	
+    	//Commit new values
+    	editor.commit();
+    	
+	}
+
+	/**
+     * Inform if default values are stored for alarm levels
+     * 
+     * @return true if there are default values into Levels Shared Preferences
+     */
+    private boolean levelsAreSet() {
+
+    	boolean result = false;
+    	String check = null;			//getString returned value
+    	
+    	//Look for description linked to value 1. If it is not stored, getString will return the second parameter value
+    	check = levelsPref.getString("1", LevelsModel.NO_LEVELS_SET);
+    	if (!check.equals(LevelsModel.NO_LEVELS_SET)){
+    		result = true;
+    	}
+    	
+		return result;
+    	
+    }
+
+	/**
+     * Store default awareness types into Shared Preferences
+     */
+    private void setDefaultAwarenesses() {
+
+    	Editor editor = null;				//Awareness SharedPreferences editor
+    	
+    	//Get the shared preferences editor
+    	editor = awarenessPref.edit();
+    	
+    	//Load all awareness values from array defined in AwarenessModel class
+    	for (int i = 1; i <= AwarenessModel.NUM_AWARENESS; i++){
+    		editor.putString(String.valueOf(i), AwarenessModel.allAwareness[i-1]);
+    	}
+    	
+    	//Commit new values
+    	editor.commit();
+	}
+
+	/**
+     * Inform if default values are stored for Awareness types
+     * 
+     * @return true if there are default values into Awareness Shared Preferences
+     */
+    private boolean awarenessesAreSet() {
+		
+    	boolean result = false;
+    	String check = null;			//getString returned value
+    	
+    	//Look for description linked to value 1. If it is not stored, getString will return the second parameter value
+    	check = awarenessPref.getString("1", AwarenessModel.NO_AWARENESS_SET);
+    	if (!check.equals(AwarenessModel.NO_AWARENESS_SET)){
+    		result = true;
+    	}
+    	
+		return result;
+	}
+
+	/**
      * Loads the references for each UI Element of the application
      */
     private void getUIElements() {
@@ -381,6 +476,10 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		SharedPreferences.Editor editor = sPref.edit();
 		editor.putString(Constants.PREF_PREFERRED_CONNECTION, Constants.ANY);
 		editor.commit();
+		
+		//TODO: Debug mode, insert default awareness and levels
+		setDefaultAwarenesses();
+		setDefaultLevels();
 	}
 	
 	/**
@@ -538,7 +637,17 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     		
     		//Get stream from url
     		stream = downloadUrl(url);
-    		    		
+    		    
+    		//Check if the online file is newer than the last one we downloaded
+    		//If there is a new file version, load data from url...
+//    		if(onlineIsNewer()){
+//    			
+//    		}
+//    		//If we have the same version, load data from bbdd...
+//    		else{
+//    			
+//    		}
+    		
     		//Initialize parser
     		parser = new Parser();
     		

@@ -57,6 +57,8 @@ public final class Constants {
 	//Preferences Names
 	public static final String GENERAL_PREFERENCES = "WeatherAlarmPrefs";
 	public static final String PREF_PREFERRED_CONNECTION = "ConnectionPreferred";
+	public static final String AWARENESS_PREFERENCES = "AwarenessPrefs";
+	public static final String LEVELS_PREFERENCES = "LevelsPrefs";
 	
 	//Date format
 	public static final String FORMATTER = "dd MMM h:mmaa";
@@ -66,4 +68,5 @@ public final class Constants {
 	//Time to be waiting for current location
 	public static final int LOC_MAX_CYCLES_WAIT = 5;
 	public static final int LOC_CYCLE_TIME_MILLIS = 1000;
+	
 }
