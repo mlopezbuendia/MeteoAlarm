@@ -9,19 +9,40 @@ package com.rwd.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.database.SQLException;
 import android.util.SparseIntArray;
 import android.util.Xml;
 
+import com.rwd.database.ItemsDAO;
+import com.rwd.database.DatabaseConstants;
+
 public class Parser {
 	
-	//Parser stores info in BBDD
-	public void parse(InputStream in) throws XmlPullParserException, IOException{
+	private ItemsDAO datasource;		//Stores datasource reference
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param datasource where to store info when parsing
+	 */
+	public Parser(ItemsDAO datasource){
+		this.datasource = datasource;
+	}
+	
+	/**
+	 * Parse inputstream
+	 * 
+	 * @param in stream to be parsed
+	 * @param datasource where to store info
+	 * @throws XmlPullParserException
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	public void parse(InputStream in) throws XmlPullParserException, IOException, SQLException{
 		
 		try{
 			//Defining the parser
@@ -38,11 +59,19 @@ public class Parser {
 		
 	}
 	
-	//Processing the feed
-	private void readFeed(XmlPullParser parser) throws XmlPullParserException, IOException{
+	/**
+	 * Proccess the feed and insert items with alarms into database
+	 * 
+	 * @param parser
+	 * @throws XmlPullParserException
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	private void readFeed(XmlPullParser parser) throws XmlPullParserException, IOException, SQLException{
 		
-		//Name of current tag
-		String currentTag = null;
+		String currentTag = null;			//Name of current tag
+		Item item = null;					//Item extracted in each iteration
+		long insertResult = -1;			//Insert operation's result
 		
 		//Parser parameters
 		parser.require(XmlPullParser.START_TAG, Constants.ns, Constants.startTag);
@@ -58,7 +87,18 @@ public class Parser {
 			
 			//Looking for "item" tag
 			if(currentTag.equals(Constants.lookedTag)){
-				readItem(parser);
+				item = readItem(parser);
+				
+				//Once we have the item, insert it into data only if contains alarms yellow, orange or red
+				if(item.haveAlarms()){
+					insertResult = datasource.insertItem(item);
+					
+					//If insert failed, throw exception to invalidate data
+					if(insertResult == -1){
+						throw new SQLException(DatabaseConstants.SQL_INSERT_EXCEPTION);
+					}
+				}
+				
 			}
 			//If we receive channel tag, skip only this line
 			else if(currentTag.equals(Constants.channelTag)){
@@ -72,13 +112,14 @@ public class Parser {
 	}
 	
 	/**
-	 * Reads the content of an item and populates one instance. After that insert that instance into bbdd
+	 * Reads the content of an item and populates one instance. 
 	 * 
 	 * @param parser doc
+	 * @return Item with alarms info for a location
 	 * @throws IOException 
 	 * @throws XmlPullParserException 
 	 */
-	private void readItem(XmlPullParser parser) throws XmlPullParserException, IOException{
+	private Item readItem(XmlPullParser parser) throws XmlPullParserException, IOException{
 		
 		Item result = null;
 		String currentTag = null;			//Name of current tag
@@ -130,8 +171,7 @@ public class Parser {
 		//Building new Item instance
 		result = new Item(title, link, description, pubDate, guid);
 		
-		//Store Item instance
-		insertItem(result);
+		return result;
 		
 	}
 	
@@ -300,8 +340,10 @@ public class Parser {
 				level = Integer.parseInt(alarmInfo.substring(6, 7));
 			}
 			
-			//Add the new alarm for the processed day
-			result.put(type, level);
+			//Add the new alarm for the processed day only if it is a orange, yellow or red alarm
+			if(level > 1){
+				result.put(type, level);
+			}
 			
 			//Advance to the next alarm of the current day
 			index = alarmInfo.indexOf(Constants.startInfo);

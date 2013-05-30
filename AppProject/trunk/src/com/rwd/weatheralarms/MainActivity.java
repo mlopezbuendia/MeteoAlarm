@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.SQLException;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -45,8 +46,10 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationRequest;
+import com.rwd.database.ItemsDAO;
 import com.rwd.utils.AwarenessModel;
 import com.rwd.utils.Constants;
+import com.rwd.utils.Item;
 import com.rwd.utils.LevelsModel;
 import com.rwd.utils.LocationUtils;
 import com.rwd.utils.Parser;
@@ -542,6 +545,163 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		
 	}
 	
+	/**
+	 * Update UI Elements after parsing Task has ended
+	 * 
+	 * @param result is the date of the last version info
+	 */
+	private void updateUIElements(String result){
+		
+		String htmlString = null;				//WebView's content
+		
+		//Get Current Location Alarm's Info
+		htmlString = buildWebViewContent();
+		
+		// Displays the HTML string in the UI via a WebView
+        myWebView.loadData(htmlString, "text/html", null);
+        
+        //Show publication date
+        mLastUpdate.setText(result);
+        
+        //Hide Progress Bar
+        mProgressBar.setVisibility(LinearLayout.INVISIBLE);
+	}
+	
+	/**
+	 * Build WebView info to be shown with the data stored in database
+	 * 
+	 * @return
+	 */
+	private String buildWebViewContent(){
+		
+		Item item = null;					//All alarm items
+		StringBuilder htmlString = null;			//Html with xml content
+		
+		//Construct html output
+		htmlString = new StringBuilder();
+		htmlString.append("<h3>" + getResources().getString(R.string.UIE_page_title) + "</h3>");
+		//Load items from bbdd
+		item = getItemsFromBBDD(currentProvince);
+		
+		//If result is null, there are no alarms
+		if (item == null){
+			//Inform we are going to show today's info
+			htmlString.append("<p>" + getString(R.string.ALI_alarm_today) + "</p>");
+			htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
+		}
+		else{
+			format alarms
+		}
+//		
+//		
+//		//If we got the current province and items without errors
+//		if ((currentProvince != null) && (items != null)){
+//    		/* 
+//    	    * Each Item object represents a alarm for a place in the XML feed.
+//    	    * This section processes selects the item for current province
+//    	    */
+//    	    for (Item item : items) {
+//    	    	//We are only interested in current province
+//    	    	if(item.getTitle().equals(currentProvince)){
+//    	    		//Get province title
+//    	    		htmlString.append("<p>");
+//    	    		htmlString.append(item.getTitle() + "</p>");
+//    	    		
+//    	    		
+//    	    		
+//    	    		//If there are not alarms for today, show a message
+//    	    		if(item.getDescription().noAlarms(Constants.today)){
+//    	    			
+//    	    		}
+//    	    		//...if there are alarms, get the formatted info
+//    	    		else{
+//        	    		htmlString.append(formatAlarms(item.getDescription().getToday()));
+//    	    		}
+//
+//    	    		//Inform we are going to show tomorrow's info
+//    	    		htmlString.append("<p>" + getString(R.string.ALI_alarm_tomorrow) + "</p>");
+//    	    		
+//    	    		//If there are not alarms for tomorrow, show a message
+//    	    		if(item.getDescription().noAlarms(Constants.tomorrow)){
+//    	    			htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
+//    	    		}
+//    	    		//...if there are alarms, get the formatted info
+//    	    		else{
+//        	    		htmlString.append(formatAlarms(item.getDescription().getTomorrow()));
+//    	    		}
+//   	    		
+//    	    		//Get publication date and show it in last update 
+//    	    		lastUpdate = item.getPubDate();
+//    	    	}
+//    	    }
+//		}
+//		//...if there was some errors retrieving current location, show an error in html view
+//		else{
+//			htmlString.append("<p>Unknown location</p>");
+//		}
+//    	   		
+//	    return htmlString.toString();
+	}
+	
+	/**
+	 * Get the alarms for a province
+	 * 
+	 * @param province
+	 * @return a list with alarms or null if there are not alarms
+	 */
+	private Item getItemsFromBBDD(String province) {
+		
+		Item result = null;
+		ItemsDAO datasource = null;				//Reference to database
+		
+		//Open datasource
+		datasource = new ItemsDAO(this);
+		datasource.open();
+		
+		//Retrieve item for current province
+		result = datasource.getItem(province);
+	
+		//Close datasource
+		datasource.close();
+		
+		return result;
+	}
+
+	/**
+	 * Format alarm info in an attractive way to show in UI
+	 * 
+	 * @param alarm map with all alarms for a day
+	 * @return string formatted
+	 */
+	private String formatAlarms(SparseIntArray alarms){
+		
+		String result = null;
+		int alarmLevel = -1;			 		//Alarm level used in processing info
+		int alarmType = -1;						//Alarm type used in processing info
+
+		result = new String();
+		
+		//Iterate over all alarm elements
+		for (int i=0; i < alarms.size(); i++){
+			
+			//Extract the current alarm info
+			alarmLevel = alarms.valueAt(i);
+			alarmType = alarms.keyAt(i);
+			
+			//Build the info
+  			result = result +"<p>" 
+						+ "Type: " 
+						+ alarmType 
+						+ " Level: "
+						+ alarmLevel
+						+ "</p>";    			
+			
+		}
+		
+		return result;
+		
+	}
+	
 	@Override
 	public void onProviderDisabled(String arg0) {
 		// TODO Auto-generated method stub
@@ -572,8 +732,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
      */
     protected class DownloadXmlTask extends AsyncTask<String, Void, String> {
 
-    	private String lastUpdate = "";				//Publication Date info for current province
-    	Context localContext = null;							//Stores the context when the Activity instantiates it
+    	Context localContext = null;					//Stores the context when the Activity instantiates it
+    	String onlineDate = null;						//Xml date retrieve from the Internet
     	
     	/**
     	 * Constructor
@@ -603,8 +763,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     			try {
     				return loadXmlFromNetwork(urls[0]);
     			//If it doesn't succeed, it shows errors
-    			}catch (XmlPullParserException e) {
-	                return getResources().getString(R.string.EEG_xml_error);
     			} catch (IOException e) {
     				return getResources().getString(R.string.EEG_connection_error);
     			}
@@ -696,6 +854,9 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 				e.printStackTrace();
 			}
     		
+    		//Store date because it can be helpful later
+    		onlineDate = result;
+    		
 			return result;
 		}
 
@@ -712,6 +873,23 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			
 			return result;
 		}
+		
+		/**
+		 * Set the date of the last data downloaded from the Internet
+		 * This date was stored in a class variable when scanning last online file
+		 * 
+		 */
+		private void setDateBBDD(){
+			
+			Editor editor = null;		//Editor used for update shared preferences
+			
+			editor = sPref.edit();
+			
+			//Store new date for xml data
+			editor.putString(Constants.BBDD_DATE, onlineDate);
+			editor.commit();
+			
+		}
 
 		@Override
     	protected void onPostExecute(String result){
@@ -721,17 +899,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     		
     		//Update UI Elements. result contains last version xml file date
     		updateUIElements(result);
-    		
-    		//TODO: remove from here and paste in the other place (updateUI)
-    		// Displays the HTML string in the UI via a WebView
-            //myWebView.loadData(result, "text/html", null);
-            
-            //Show publication date
-            //mLastUpdate.setText(lastUpdate);
-            
-            //Hide Progress Bar
-            //mProgressBar.setVisibility(LinearLayout.INVISIBLE);
-                   
+    		                   
     	}
 
     	/**
@@ -739,19 +907,11 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	 * 
     	 * @param url where to download xml
     	 * @return
-    	 * @throws IOException
-    	 * @throws XmlPullParserException 
+    	 * @throws IOException 
     	 */
-    	private String loadXmlFromNetwork(String url) throws IOException, XmlPullParserException{
+    	private String loadXmlFromNetwork(String url) throws IOException{
     		
     		InputStream stream = null;					//Represent the xml content to parse
-    		//List<Item> items = null;					//All alarm items
-    		//StringBuilder htmlString = null;			//Html with xml content
-    		
-    		//TODO: Copy it into refreshUI
-    		//Construct html output
-    		//htmlString = new StringBuilder();
-    		//htmlString.append("<h3>" + getResources().getString(R.string.UIE_page_title) + "</h3>");
     		
     		//Get stream from url
     		stream = downloadUrl(url);
@@ -762,58 +922,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     		//Return the new date after update database info
     		return getDateBBDD();
 
-    		//Load items from bbdd
-    		//items = getItemsFromBBDD();
-//    		
-//  		
-//    		//If we got the current province and items without errors
-//    		if ((currentProvince != null) && (items != null)){
-//        		/* 
-//        	    * Each Item object represents a alarm for a place in the XML feed.
-//        	    * This section processes selects the item for current province
-//        	    */
-//        	    for (Item item : items) {
-//        	    	//We are only interested in current province
-//        	    	if(item.getTitle().equals(currentProvince)){
-//        	    		//Get province title
-//        	    		htmlString.append("<p>");
-//        	    		htmlString.append(item.getTitle() + "</p>");
-//        	    		
-//        	    		//Inform we are going to show today's info
-//        	    		htmlString.append("<p>" + getString(R.string.ALI_alarm_today) + "</p>");
-//        	    		
-//        	    		//If there are not alarms for today, show a message
-//        	    		if(item.getDescription().noAlarms(Constants.today)){
-//        	    			htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
-//        	    		}
-//        	    		//...if there are alarms, get the formatted info
-//        	    		else{
-//            	    		htmlString.append(formatAlarms(item.getDescription().getToday()));
-//        	    		}
-//
-//        	    		//Inform we are going to show tomorrow's info
-//        	    		htmlString.append("<p>" + getString(R.string.ALI_alarm_tomorrow) + "</p>");
-//        	    		
-//        	    		//If there are not alarms for tomorrow, show a message
-//        	    		if(item.getDescription().noAlarms(Constants.tomorrow)){
-//        	    			htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
-//        	    		}
-//        	    		//...if there are alarms, get the formatted info
-//        	    		else{
-//            	    		htmlString.append(formatAlarms(item.getDescription().getTomorrow()));
-//        	    		}
-//       	    		
-//        	    		//Get publication date and show it in last update 
-//        	    		lastUpdate = item.getPubDate();
-//        	    	}
-//        	    }
-//    		}
-//    		//...if there was some errors retrieving current location, show an error in html view
-//    		else{
-//    			htmlString.append("<p>Unknown location</p>");
-//    		}
-//	    	   		
-//    	    return htmlString.toString();
     	}
     	
     	/**
@@ -825,13 +933,27 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	private void getItemsFromStream(InputStream stream) {
     		
     		Parser parser = null;			//Parser object to analyze xml
+    		ItemsDAO datasource = null;		//Item's DAO to insert info into database
+    		
+    		//Initialize datasource
+    		datasource = new ItemsDAO(localContext);
+
+    		//Drop current content in database
+    		datasource.dropDB();
+    		
+    		//Open datasource
+    		datasource.open();
     		
     		//Initialize parser
-    		parser = new Parser();
+    		parser = new Parser(datasource);
     		
-    		//Get items from stream
+    		//Get items from stream and store in database
     		try {
 				parser.parse(stream);
+				
+				//Update current data date
+				setDateBBDD();
+				
 			} catch (XmlPullParserException e) {
 				//Nothing special
 				Log.d(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_Xml_Parser_Exception));
@@ -840,9 +962,17 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 				//Nothing special
 				Log.d(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_IO_Exception));
 				e.printStackTrace();
-			}
-    		//Taking care: stream must be always closed
+			} catch (SQLException e){
+				//This exception indicates that there was an error in inserting data into database
+				//First of all invalidate all data in database
+				datasource.dropDB();
+				
+				//Log the info
+				Log.d(Constants.APP_TAG_EXCEPTION, e.getMessage());
+				e.printStackTrace();
+			}    		
     		finally{
+    			//Taking care: stream must be always closed
     			if(stream != null){
     				try {
 						stream.close();
@@ -851,6 +981,11 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 						Log.d(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_IO_Exception));
 						e.printStackTrace();
 					}
+    			}
+    			
+    			//Always close datasource connection
+    			if(datasource != null){
+    				datasource.close();
     			}
     		}
     		
@@ -919,42 +1054,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	    return conn.getInputStream();
     		
     	}
-    	
-    	/**
-    	 * Format alarm info in an attractive way to show in UI
-    	 * 
-    	 * @param alarm map with all alarms for a day
-    	 * @return string formatted
-    	 */
-    	private String formatAlarms(SparseIntArray alarms){
-    		
-    		String result = null;
-    		int alarmLevel = -1;			 		//Alarm level used in processing info
-    		int alarmType = -1;						//Alarm type used in processing info
-    
-    		result = new String();
-    		
-    		//Iterate over all alarm elements
-    		for (int i=0; i < alarms.size(); i++){
-    			
-    			//Extract the current alarm info
-    			alarmLevel = alarms.valueAt(i);
-    			alarmType = alarms.keyAt(i);
-    			
-    			//Build the info
-      			result = result +"<p>" 
-							+ "Type: " 
-							+ alarmType 
-							+ " Level: "
-							+ alarmLevel
-							+ "</p>";    			
-    			
-    		}
-    		
-    		return result;
-    		
-    	}
-
+    	    	
     }
 	
 	/**

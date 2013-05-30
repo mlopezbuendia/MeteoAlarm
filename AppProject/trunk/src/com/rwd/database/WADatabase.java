@@ -33,11 +33,12 @@ public class WADatabase extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		
-		//Create awarenesses table
-		db.execSQL(DatabaseConstants.AWARENESS_TABLE_CREATE);
+		//Create items table
+		db.execSQL(DatabaseConstants.ITEM_TABLE_CREATE);
 		
-		//Create levels table
-		db.execSQL(DatabaseConstants.LEVELS_TABLE_CREATE);
+		//Create alarms table
+		db.execSQL(DatabaseConstants.ALARM_TABLE_CREATE);
+
 	}
 
 	/**
@@ -52,11 +53,12 @@ public class WADatabase extends SQLiteOpenHelper {
 			  ", which will destroy all old data");
 		
 		//Drop tables
-		db.execSQL(DatabaseConstants.DROP_TABLE + DatabaseConstants.AWARENESS_TABLE_NAME);
-		db.execSQL(DatabaseConstants.DROP_TABLE + DatabaseConstants.LEVELS_TABLE_NAME);
+		db.execSQL(DatabaseConstants.DROP_TABLE + DatabaseConstants.ITEM_TABLE_NAME);
+		db.execSQL(DatabaseConstants.DROP_TABLE + DatabaseConstants.ALARM_TABLE_NAME);
 		
 		//Create tables
 		onCreate(db);
+		
 	}
 
 }
