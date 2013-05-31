@@ -68,8 +68,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     private String currentProvince = null;
     
     //Task handlers
-    private AsyncTask downloadXmlHandler = null;
-    private AsyncTask getAddressHandler = null;
+    private AsyncTask<String, Void, String> downloadXmlHandler = null;
+    private AsyncTask<Location, Void, String> getAddressHandler = null;
     
     // Whether there is a Wi-Fi connection.
     private boolean wifiConnected = false; 
@@ -546,7 +546,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	}
 	
 	/**
-	 * Update UI Elements after parsing Task has ended
+	 * Update UI Elements after parsing Task has ended. If currentProvince is null, show error in screen (done in BuildWebViewContent)
+	 * It also shows info for current country if there are some alarms for it.
 	 * 
 	 * @param result is the date of the last version info
 	 */
@@ -557,7 +558,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		//Get Current Location Alarm's Info
 		htmlString = buildWebViewContent();
 		
-		// Displays the HTML string in the UI via a WebView
+		// Displays the HTML string for current location's alarms in the UI via a WebView
         myWebView.loadData(htmlString, "text/html", null);
         
         //Show publication date
@@ -580,67 +581,56 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		//Construct html output
 		htmlString = new StringBuilder();
 		htmlString.append("<h3>" + getResources().getString(R.string.UIE_page_title) + "</h3>");
-		//Load items from bbdd
-		item = getItemsFromBBDD(currentProvince);
 		
-		//If result is null, there are no alarms
-		if (item == null){
-			//Inform we are going to show today's info
-			htmlString.append("<p>" + getString(R.string.ALI_alarm_today) + "</p>");
-			htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
+		//If we are able to know the current province...
+		if(currentProvince != null){
+		
+			//Load items from bbdd
+			item = getItemsFromBBDD(currentProvince);
+			
+			//If result is null, there are no alarms
+			if (item == null){
+				//Inform we are going to show today's info
+				htmlString.append("<p>" + getString(R.string.ALI_alarm_today) + "</p>");
+				htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
+				
+				//Inform we are going to show tomorrow's info
+				htmlString.append("<p>" + getString(R.string.ALI_alarm_tomorrow) + "</p>");
+				htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
+			}
+			else{
+				//Inform we are going to show today's info
+				htmlString.append("<p>" + getString(R.string.ALI_alarm_today) + "</p>");
+				
+				//If there are some alarms, extract and show them
+				if(item.getDescription().noAlarms(Constants.today)){
+					htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
+				}
+				else{
+					htmlString.append(formatAlarms(item.getDescription().getToday()));
+				}
+				
+				//Inform we are going to show tomorrow's info
+				htmlString.append("<p>" + getString(R.string.ALI_alarm_tomorrow) + "</p>");
+				
+				//If there are some alarms, extract and show them
+				if(item.getDescription().noAlarms(Constants.tomorrow)){
+					htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
+				}
+				else{
+					htmlString.append(formatAlarms(item.getDescription().getTomorrow()));
+				}
+				
+			}
+			
+		//...we can't get current province
 		}
 		else{
-			format alarms
+			htmlString.append("<p>" + getString(R.string.LCI_no_address_found) + "</p>");
 		}
-//		
-//		
-//		//If we got the current province and items without errors
-//		if ((currentProvince != null) && (items != null)){
-//    		/* 
-//    	    * Each Item object represents a alarm for a place in the XML feed.
-//    	    * This section processes selects the item for current province
-//    	    */
-//    	    for (Item item : items) {
-//    	    	//We are only interested in current province
-//    	    	if(item.getTitle().equals(currentProvince)){
-//    	    		//Get province title
-//    	    		htmlString.append("<p>");
-//    	    		htmlString.append(item.getTitle() + "</p>");
-//    	    		
-//    	    		
-//    	    		
-//    	    		//If there are not alarms for today, show a message
-//    	    		if(item.getDescription().noAlarms(Constants.today)){
-//    	    			
-//    	    		}
-//    	    		//...if there are alarms, get the formatted info
-//    	    		else{
-//        	    		htmlString.append(formatAlarms(item.getDescription().getToday()));
-//    	    		}
-//
-//    	    		//Inform we are going to show tomorrow's info
-//    	    		htmlString.append("<p>" + getString(R.string.ALI_alarm_tomorrow) + "</p>");
-//    	    		
-//    	    		//If there are not alarms for tomorrow, show a message
-//    	    		if(item.getDescription().noAlarms(Constants.tomorrow)){
-//    	    			htmlString.append("<p>" + getString(R.string.ALI_no_alarm) + "</p>");
-//    	    		}
-//    	    		//...if there are alarms, get the formatted info
-//    	    		else{
-//        	    		htmlString.append(formatAlarms(item.getDescription().getTomorrow()));
-//    	    		}
-//   	    		
-//    	    		//Get publication date and show it in last update 
-//    	    		lastUpdate = item.getPubDate();
-//    	    	}
-//    	    }
-//		}
-//		//...if there was some errors retrieving current location, show an error in html view
-//		else{
-//			htmlString.append("<p>Unknown location</p>");
-//		}
-//    	   		
-//	    return htmlString.toString();
+
+		return htmlString.toString();
+		
 	}
 	
 	/**
@@ -937,12 +927,12 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     		
     		//Initialize datasource
     		datasource = new ItemsDAO(localContext);
+    		
+    		//Open datasource
+    		datasource.open();    		
 
     		//Drop current content in database
     		datasource.dropDB();
-    		
-    		//Open datasource
-    		datasource.open();
     		
     		//Initialize parser
     		parser = new Parser(datasource);
@@ -1006,29 +996,26 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     		//Set max number of cycles
     		cycle = Constants.LOC_MAX_CYCLES_WAIT;
     		
-    		//Checks if getAddressTask is finished
-    		while ((cycle > 0) && (getAddressHandler.getStatus() == AsyncTask.Status.RUNNING)){
-	    		try {
-	    			//If it is running, wait for 1 seconds
-					Thread.sleep(Constants.LOC_CYCLE_TIME_MILLIS);
-					cycle--;
-				} catch (InterruptedException e) {
-					//Register log and print stacktrace
-					Log.e(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_interrupted_exception));
-					e.printStackTrace();
-				}
-    		}    		
-    		
-    		//If task is still running
-    		if((getAddressHandler.getStatus() == AsyncTask.Status.RUNNING)){
-    			//TODO: que hacer cuando no hay manera de sacar la localización.....
-    		}
-    		//If we already have current location it is stored in mAddress text view
-    		else{
-
-    			result = mAddress.getText().toString();
-
-    		}
+    		//If getAddressHandler is null it is because we don't have location ability so, return null
+    		if(getAddressHandler != null){
+        		//Checks if getAddressTask is finished
+        		while ((cycle > 0) && (getAddressHandler.getStatus() == AsyncTask.Status.RUNNING)){
+    	    		try {
+    	    			//If it is running, wait for 1 seconds
+    					Thread.sleep(Constants.LOC_CYCLE_TIME_MILLIS);
+    					cycle--;
+    				} catch (InterruptedException e) {
+    					//Register log and print stacktrace
+    					Log.e(Constants.APP_TAG_EXCEPTION, getString(R.string.EEG_interrupted_exception));
+    					e.printStackTrace();
+    				}
+        		} 
+        		
+        		//If task is still not running running return current location, in other case, will return null
+        		if((getAddressHandler.getStatus() != AsyncTask.Status.RUNNING)){
+        			result = mAddress.getText().toString();
+        		}
+      		}    		
     		
     		return result;
 	    	

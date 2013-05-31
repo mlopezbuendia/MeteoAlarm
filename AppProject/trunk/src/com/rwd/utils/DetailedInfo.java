@@ -1,7 +1,5 @@
 package com.rwd.utils;
 
-import java.util.Map;
-
 import android.util.SparseIntArray;
 
 /**
@@ -68,7 +66,6 @@ public class DetailedInfo {
 		
 		boolean result = false;
 		SparseIntArray looked = null;				//Reference of the map where to look
-		int level = -1;								//For extract level alarm when there is only one in the map
 		
 		//Select the day we are looking for
 		switch (day){
@@ -83,16 +80,9 @@ public class DetailedInfo {
 			}
 		}
 		
-		//There won't be alarms if there is only 1 alarm element and its level is "Green Level" = 1
-		//TODO: IF AT THE END USE SQLITE TABLE FOR THIS PARAMETER, CHANGE THE CONDITION
-		if(looked.size() == 1){
-			//Extract the first element (there is only one)
-			level = looked.valueAt(0);
-			
-			//If the level is equals to 1, then this is not an alarm
-			if (level == 1){
-				result = true;
-			}
+		//There won't be alarms if there is no elements stored into SparseArrayInt
+		if(looked.size() == 0){
+			result = true;
 		}
 		
 		return result;
