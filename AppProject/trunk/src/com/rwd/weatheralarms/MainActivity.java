@@ -87,6 +87,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     private WebView myWebView;    
     private Button parseButton = null;
     private Button prefButton = null;
+    private TextView mInfoCountryAlarms;
+    private Button mGoToCountryAlarms;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -242,6 +244,24 @@ public class MainActivity extends FragmentActivity implements LocationListener,
     	
     	//WebView with alarms info
     	myWebView = (WebView) findViewById(R.id.MAmainWebView);
+    	
+    	/* Country Alarm's info */
+    	
+    	//Get TextView 
+    	mInfoCountryAlarms = (TextView) findViewById(R.id.MAinfoCountry);
+    	   	  	
+    	//Get Button, set onclick and make it invisible
+    	mGoToCountryAlarms = (Button) findViewById(R.id.MAgotoCountry);
+    	mGoToCountryAlarms.setVisibility(LinearLayout.INVISIBLE);
+    	mGoToCountryAlarms.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				//TODO: Go to second activity with alarms for current country
+			}
+		});
+    	
+    	/* END Country Alarm's info */
 	}
 
 	/**
@@ -554,12 +574,34 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	private void updateUIElements(String result){
 		
 		String htmlString = null;				//WebView's content
+		int totalAlarms = -1;					//Number of alarms stored for the current country
 		
 		//Get Current Location Alarm's Info
 		htmlString = buildWebViewContent();
 		
-		// Displays the HTML string for current location's alarms in the UI via a WebView
+		//Displays the HTML string for current location's alarms in the UI via a WebView
         myWebView.loadData(htmlString, "text/html", null);
+        
+        //Get the number of alarms stored in database
+        totalAlarms = numCountryAlarms();
+        
+        //Show Country Alarms Text
+        
+        //If no alarms for the current country, inform...
+        if(totalAlarms == 0){
+        	mInfoCountryAlarms.setVisibility(LinearLayout.VISIBLE);
+        	mInfoCountryAlarms.setText(R.string.UIE_country_no_alarms);
+        }
+        //If we got -1 something went wrong when reading from database
+        else if (totalAlarms == -1){
+        	mInfoC
+        }
+        //Inform if there are alarms in the current country and show a button for explore them
+        else{
+        	mInfoCountryAlarms.setVisibility(LinearLayout.VISIBLE);
+        	mGoToCountryAlarms.setVisibility(LinearLayout.VISIBLE);
+        }
+        
         
         //Show publication date
         mLastUpdate.setText(result);
@@ -568,6 +610,29 @@ public class MainActivity extends FragmentActivity implements LocationListener,
         mProgressBar.setVisibility(LinearLayout.INVISIBLE);
 	}
 	
+	/**
+	 * Check if there are alarms for the current country
+	 * 
+	 * @return number of alarms for the current country
+	 */
+	private int numCountryAlarms() {
+
+		ItemsDAO datasource = null;			//Database reference
+		int result = -1;
+		
+		//Connect to database
+		datasource = new ItemsDAO(this);
+		datasource.open();
+		
+		//Get the alarms from database
+		result = datasource.numAlarms();
+		
+		//Close database
+		datasource.close();
+		
+		return result;
+	}
+
 	/**
 	 * Build WebView info to be shown with the data stored in database
 	 * 

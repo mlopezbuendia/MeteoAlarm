@@ -2,6 +2,7 @@
 [20130521] Creando el location request, voy por la línea 87 mirando los recursos que me he bajado sobre "LocationUpdates" y mirando las webs abiertas en Chrome
 [20130528] Ya muestra los códigos de las alarmas para la provincia actual. Estoy mirando la forma de guardar datos en SQLite.
 [20130530] Formatting alarms in MainActivity.java
+[20130531] Mostrando alarmas del pais
 
 ### El método getCurrentProvince() hace un wait con ciclos, ver si se puede hacer un join-wait como los threads para que sea más efici. ###
 ### Falta añadirle el botón de actualizar al menú superior ###

@@ -214,6 +214,33 @@ public class ItemsDAO {
 		return result;
 		
 	}
+	
+	/**
+	 * Get the number of alarms for the current country
+	 * 
+	 * @return number of alarms found in database
+	 */
+	public int numAlarms(){
+		
+		int result = -1;
+		Cursor cursor = null;			//Cursor to store returned values
+		
+		//Select count (*)
+		cursor = database.rawQuery(DatabaseConstants.SQL_ALARMS_COUNT, null);
+		
+		//Cursor always return at least 1 item
+		if (cursor != null){
+			cursor.moveToFirst();
+			//Get count
+			result = cursor.getInt(0);
+		}
+		
+		//Close cursor
+		cursor.close();
+		
+		return result;
+		
+	}
 
 	/**
 	 * Extract alarms from database and populate result item

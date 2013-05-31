@@ -9,6 +9,9 @@
 	<string name="UIE_parse_button">Parse</string>
 	<string name="UIE_set_pref">Set Prefs</string>
 	<string name="UIE_xml_date">Last update: </string>
+	<string name="UIE_country_alarms">Found alarms in your country</string>
+	<string name="UIE_country_no_alarms">No alarms found in your country</string>
+	<string name="UIE_view_country_alarms">View Country Alarms</string>
 	<!-- END Texts for UI Elements -->
 	
 	<!-- Exceptions, Errors and General App Info -->

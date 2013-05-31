@@ -67,4 +67,7 @@ public class DatabaseConstants {
 	//SQL Exception Text
 	public static final String SQL_INSERT_EXCEPTION = "SQL Exception. Insert operation failed!";
 	
+	//SQL Alarms count Sentence
+	public static final String SQL_ALARMS_COUNT = "select count(*) from " + ALARM_TABLE_NAME + ";";
+	
 }

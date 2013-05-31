@@ -183,12 +183,14 @@ containing a value of this type.
     }
     public static final class id {
         public static final int MAaddress=0x7f050006;
+        public static final int MAgotoCountry=0x7f05000c;
+        public static final int MAinfoCountry=0x7f05000b;
         public static final int MAinitialLoading=0x7f050009;
         public static final int MAmainWebView=0x7f05000a;
         public static final int MAparseButton=0x7f050007;
         public static final int MAsetPreference=0x7f050008;
         public static final int MAxmlDate=0x7f050005;
-        public static final int action_settings=0x7f05000b;
+        public static final int action_settings=0x7f05000d;
         public static final int hybrid=0x7f050004;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
@@ -205,47 +207,50 @@ containing a value of this type.
         /**  END Location Info 
  Alarm Info 
          */
-        public static final int ALI_alarm_today=0x7f060031;
-        public static final int ALI_alarm_tomorrow=0x7f060032;
-        public static final int ALI_no_alarm=0x7f060033;
-        public static final int EEG_IO_Exception=0x7f06001e;
-        public static final int EEG_Xml_Not_Downloaded=0x7f060020;
-        public static final int EEG_Xml_Parser_Exception=0x7f06001f;
+        public static final int ALI_alarm_today=0x7f060034;
+        public static final int ALI_alarm_tomorrow=0x7f060035;
+        public static final int ALI_no_alarm=0x7f060036;
+        public static final int EEG_IO_Exception=0x7f060021;
+        public static final int EEG_Xml_Not_Downloaded=0x7f060023;
+        public static final int EEG_Xml_Parser_Exception=0x7f060022;
         /**  END Texts for UI Elements 
  Exceptions, Errors and General App Info 
          */
-        public static final int EEG_connection_error=0x7f06001c;
-        public static final int EEG_illegal_argument_exception=0x7f060022;
-        public static final int EEG_interrupted_exception=0x7f060023;
-        public static final int EEG_unknown_activity_request_code=0x7f060021;
-        public static final int EEG_xml_error=0x7f06001d;
-        public static final int GPC_connected=0x7f060025;
-        public static final int GPC_connection_state=0x7f060026;
-        public static final int GPC_connection_status=0x7f060027;
-        public static final int GPC_disconnected=0x7f060029;
-        public static final int GPC_no_resolution=0x7f060028;
-        public static final int GPC_play_services_available=0x7f06002a;
+        public static final int EEG_connection_error=0x7f06001f;
+        public static final int EEG_illegal_argument_exception=0x7f060025;
+        public static final int EEG_interrupted_exception=0x7f060026;
+        public static final int EEG_unknown_activity_request_code=0x7f060024;
+        public static final int EEG_xml_error=0x7f060020;
+        public static final int GPC_connected=0x7f060028;
+        public static final int GPC_connection_state=0x7f060029;
+        public static final int GPC_connection_status=0x7f06002a;
+        public static final int GPC_disconnected=0x7f06002c;
+        public static final int GPC_no_resolution=0x7f06002b;
+        public static final int GPC_play_services_available=0x7f06002d;
         /**  END Exceptions, Errors and General App Info 
  Google Play Connection Info 
          */
-        public static final int GPC_resolved=0x7f060024;
+        public static final int GPC_resolved=0x7f060027;
         /**  END Google Play Connection Info 
  Location Info 
          */
-        public static final int LCI_address_output_string=0x7f06002b;
-        public static final int LCI_latitude_longitude=0x7f06002c;
-        public static final int LCI_location_disconnected=0x7f060030;
-        public static final int LCI_location_updated=0x7f06002d;
-        public static final int LCI_no_address_found=0x7f06002e;
-        public static final int LCI_no_geocoder_available=0x7f06002f;
+        public static final int LCI_address_output_string=0x7f06002e;
+        public static final int LCI_latitude_longitude=0x7f06002f;
+        public static final int LCI_location_disconnected=0x7f060033;
+        public static final int LCI_location_updated=0x7f060030;
+        public static final int LCI_no_address_found=0x7f060031;
+        public static final int LCI_no_geocoder_available=0x7f060032;
         public static final int UIE_action_settings=0x7f060016;
         /**  Texts for UI Elements 
          */
         public static final int UIE_app_name=0x7f060015;
+        public static final int UIE_country_alarms=0x7f06001c;
+        public static final int UIE_country_no_alarms=0x7f06001d;
         public static final int UIE_page_title=0x7f060017;
         public static final int UIE_parse_button=0x7f060019;
         public static final int UIE_set_pref=0x7f06001a;
         public static final int UIE_updated=0x7f060018;
+        public static final int UIE_view_country_alarms=0x7f06001e;
         public static final int UIE_xml_date=0x7f06001b;
         /**   Title for notification shown when GooglePlayServices is unavailable [CHAR LIMIT=70] 
          */
