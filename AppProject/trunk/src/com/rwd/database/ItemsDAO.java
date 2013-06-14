@@ -159,7 +159,7 @@ public class ItemsDAO {
 								//select *
 					   			DatabaseConstants.ITEM_ALL_COLUMNS,
 					   			//where
-					   			DatabaseConstants.ITEM_COLUMN_TITLE + " = " + province, 
+					   			DatabaseConstants.ITEM_COLUMN_TITLE + " = '" + province + "'", 
 					   			//AS
 					   			null, 
 					   			//groupBy
@@ -207,6 +207,9 @@ public class ItemsDAO {
 		
 		}
 		//If we can't move to first there are no results so result will be null
+		else{
+			result = null;
+		}
 		
 		//Close the cursor
 		cursor.close();

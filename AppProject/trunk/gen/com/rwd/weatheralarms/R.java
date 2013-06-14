@@ -198,18 +198,20 @@ containing a value of this type.
         public static final int terrain=0x7f050003;
     }
     public static final class layout {
-        public static final int activity_main=0x7f030000;
+        public static final int activity_country_detail=0x7f030000;
+        public static final int activity_main=0x7f030001;
     }
     public static final class menu {
-        public static final int main=0x7f090000;
+        public static final int country_detail=0x7f090000;
+        public static final int main=0x7f090001;
     }
     public static final class string {
         /**  END Location Info 
  Alarm Info 
          */
-        public static final int ALI_alarm_today=0x7f060034;
-        public static final int ALI_alarm_tomorrow=0x7f060035;
-        public static final int ALI_no_alarm=0x7f060036;
+        public static final int ALI_alarm_today=0x7f060035;
+        public static final int ALI_alarm_tomorrow=0x7f060036;
+        public static final int ALI_no_alarm=0x7f060037;
         public static final int EEG_IO_Exception=0x7f060021;
         public static final int EEG_Xml_Not_Downloaded=0x7f060023;
         public static final int EEG_Xml_Parser_Exception=0x7f060022;
@@ -217,29 +219,30 @@ containing a value of this type.
  Exceptions, Errors and General App Info 
          */
         public static final int EEG_connection_error=0x7f06001f;
+        public static final int EEG_error_country_alarms=0x7f060027;
         public static final int EEG_illegal_argument_exception=0x7f060025;
         public static final int EEG_interrupted_exception=0x7f060026;
         public static final int EEG_unknown_activity_request_code=0x7f060024;
         public static final int EEG_xml_error=0x7f060020;
-        public static final int GPC_connected=0x7f060028;
-        public static final int GPC_connection_state=0x7f060029;
-        public static final int GPC_connection_status=0x7f06002a;
-        public static final int GPC_disconnected=0x7f06002c;
-        public static final int GPC_no_resolution=0x7f06002b;
-        public static final int GPC_play_services_available=0x7f06002d;
+        public static final int GPC_connected=0x7f060029;
+        public static final int GPC_connection_state=0x7f06002a;
+        public static final int GPC_connection_status=0x7f06002b;
+        public static final int GPC_disconnected=0x7f06002d;
+        public static final int GPC_no_resolution=0x7f06002c;
+        public static final int GPC_play_services_available=0x7f06002e;
         /**  END Exceptions, Errors and General App Info 
  Google Play Connection Info 
          */
-        public static final int GPC_resolved=0x7f060027;
+        public static final int GPC_resolved=0x7f060028;
         /**  END Google Play Connection Info 
  Location Info 
          */
-        public static final int LCI_address_output_string=0x7f06002e;
-        public static final int LCI_latitude_longitude=0x7f06002f;
-        public static final int LCI_location_disconnected=0x7f060033;
-        public static final int LCI_location_updated=0x7f060030;
-        public static final int LCI_no_address_found=0x7f060031;
-        public static final int LCI_no_geocoder_available=0x7f060032;
+        public static final int LCI_address_output_string=0x7f06002f;
+        public static final int LCI_latitude_longitude=0x7f060030;
+        public static final int LCI_location_disconnected=0x7f060034;
+        public static final int LCI_location_updated=0x7f060031;
+        public static final int LCI_no_address_found=0x7f060032;
+        public static final int LCI_no_geocoder_available=0x7f060033;
         public static final int UIE_action_settings=0x7f060016;
         /**  Texts for UI Elements 
          */
@@ -252,6 +255,7 @@ containing a value of this type.
         public static final int UIE_updated=0x7f060018;
         public static final int UIE_view_country_alarms=0x7f06001e;
         public static final int UIE_xml_date=0x7f06001b;
+        public static final int action_settings=0x7f060039;
         /**   Title for notification shown when GooglePlayServices is unavailable [CHAR LIMIT=70] 
          */
         public static final int auth_client_availability_notification_title=0x7f06000f;
@@ -316,6 +320,7 @@ containing a value of this type.
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
         public static final int common_signin_button_text_long=0x7f06000e;
+        public static final int hello_world=0x7f06003a;
         /**  Location client code resources (prefix with location_client) 
 
         Begin strings for location.reporting
@@ -327,6 +332,9 @@ containing a value of this type.
         public static final int location_client_ulr_inactive_age_under_13=0x7f060012;
         public static final int location_client_ulr_inactive_age_unknown=0x7f060013;
         public static final int location_client_ulr_inactive_unknown_restriction=0x7f060014;
+        /**  END Alarm Info 
+         */
+        public static final int title_activity_country_detail=0x7f060038;
     }
     public static final class style {
         /** 

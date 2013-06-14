@@ -257,7 +257,11 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			
 			@Override
 			public void onClick(View v) {
-				//TODO: Go to second activity with alarms for current country
+				Intent intent = null;
+				
+				intent = new Intent(MainActivity.this, CountryDetailActivity.class);
+				startActivity(intent);
+				
 			}
 		});
     	
@@ -589,16 +593,14 @@ public class MainActivity extends FragmentActivity implements LocationListener,
         
         //If no alarms for the current country, inform...
         if(totalAlarms == 0){
-        	mInfoCountryAlarms.setVisibility(LinearLayout.VISIBLE);
         	mInfoCountryAlarms.setText(R.string.UIE_country_no_alarms);
         }
         //If we got -1 something went wrong when reading from database
         else if (totalAlarms == -1){
-        	mInfoC
+        	mInfoCountryAlarms.setText(R.string.EEG_error_country_alarms);
         }
         //Inform if there are alarms in the current country and show a button for explore them
         else{
-        	mInfoCountryAlarms.setVisibility(LinearLayout.VISIBLE);
         	mGoToCountryAlarms.setVisibility(LinearLayout.VISIBLE);
         }
         
